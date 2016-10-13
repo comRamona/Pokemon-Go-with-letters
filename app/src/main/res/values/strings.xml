@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">AndroidTut</string>
+    <string name="edit_message">Enter a message</string>
+    <string name="button_send">Send</string>
+    <string name="button_start">Start</string>
+    <string name="button_load">Load</string>
+    <string name="title_activity_map">MapActivity</string>
+    <string name="title_activity_campus_map">CampusMap</string>
+    <string name="xml_error">XmlError</string>
+    <string name="connection_error">ConnectionError</string>
+</resources>
