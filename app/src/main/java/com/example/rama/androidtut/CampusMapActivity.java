@@ -8,6 +8,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
+import android.graphics.drawable.ColorDrawable;
 import android.location.GpsStatus;
 import android.location.Location;
 import android.location.LocationManager;
@@ -18,11 +19,23 @@ import android.os.AsyncTask;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
+import android.view.Gravity;
+import android.view.LayoutInflater;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.WindowManager;
+import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.PopupMenu;
+import android.widget.PopupWindow;
 import android.widget.Toast;
 
 
@@ -77,6 +90,9 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
     private LocationRequest mLocationRequest;
     private LocationSettingsRequest mLocationSettingsRequest;
     KmlLayer kmlLayer;
+    private boolean markers_loaded=false;
+    private FloatingActionButton fab;
+    private PopupWindow pwindo;
 
     protected static final String LOCATION_KEY = "location-key";
     /**
@@ -117,8 +133,76 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
         buildGoogleApiClient();
         createLocationRequest();
         buildLocationSettingsRequest();
+      fab=(FloatingActionButton) findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showOptionsDialog();
+            }
+        });
 
 
+    }
+
+    public void showOptionsDialog(){
+        try {
+// We need to get the instance of the LayoutInflater
+            LayoutInflater inflater = (LayoutInflater) this
+                    .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            View layout = inflater.inflate(R.layout.popup_win,
+                    (ViewGroup) findViewById(R.id.popup_element));
+            pwindo = new PopupWindow(layout, 800, 800,true);
+            pwindo.showAtLocation(layout, Gravity.CENTER, 0, 0);
+            pwindo.setBackgroundDrawable(new ColorDrawable());
+            layout.getBackground().setAlpha(240);
+
+            FloatingActionButton fab_close=(FloatingActionButton) layout.findViewById(R.id.fab_cancel);
+            fab_close.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    pwindo.dismiss();
+
+                }
+            });
+
+            FloatingActionButton fab_new=(FloatingActionButton) layout.findViewById(R.id.fab_new);
+            fab_new.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    pwindo.dismiss();
+                }
+            });
+
+            FloatingActionButton fab_instr=(FloatingActionButton) layout.findViewById(R.id.fab_instr);
+            fab_instr.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    pwindo.dismiss();
+                }
+            });
+
+            FloatingActionButton fab_stats=(FloatingActionButton) layout.findViewById(R.id.fab_stats);
+            fab_stats.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    pwindo.dismiss();
+                }
+            });
+
+            FloatingActionButton fab_usr=(FloatingActionButton) layout.findViewById(R.id.fab_usr);
+            fab_usr.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    pwindo.dismiss();
+                }
+            });
+
+
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -440,22 +524,57 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
     }
 
     public void loadThings() {
-        try {
-            ConnectivityManager connMgr = (ConnectivityManager)
-                    getSystemService(Context.CONNECTIVITY_SERVICE);
-            NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
-            if (networkInfo != null && networkInfo.isConnected()) {
-                // fetch data
+        if(!markers_loaded) {
+            try {
+                ConnectivityManager connMgr = (ConnectivityManager)
+                        getSystemService(Context.CONNECTIVITY_SERVICE);
+                NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
+                if (networkInfo != null && networkInfo.isConnected()) {
+                    // fetch data
 
-                String url = "http://www.inf.ed.ac.uk/teaching/courses/selp/coursework/sunday.kml";
-                new DownloadLettersTask().execute(url);
-            } else {
-                Toast.makeText(this, "No network connection.", Toast.LENGTH_LONG).show();
+                    String url = "http://www.inf.ed.ac.uk/teaching/courses/selp/coursework/sunday.kml";
+                    new DownloadLettersTask().execute(url);
+                } else {
+                    showInternetAlert();
+                }
+            } catch (Error e) {
+                Log.i(TAG, "load things failed");
             }
-        } catch (Error e) {
-            Log.i(TAG, "load things failed");
         }
     }
+    public void showInternetAlert(){
+        AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
+
+        // Setting Dialog Title
+        alertDialog.setTitle("Could not download data.");
+
+        // Setting Dialog Message
+        alertDialog.setMessage("Internet is not enabled. Please try again.");
+
+        // Setting Icon to Dialog
+        //alertDialog.setIcon(R.drawable.delete);
+
+
+        // on pressing cancel button
+        alertDialog.setPositiveButton("Retry", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+                if(!markers_loaded) loadThings();
+            }
+        });
+
+        alertDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+
+            }
+        });
+
+        // Showing Alert Message
+        alertDialog.show();
+
+    }
+
 
 //    private void moveCameraToKml(KmlLayer kmlLayer) {
 //        //Retrieve the first container in the KML layer
@@ -485,7 +604,7 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
 
                 ByteArrayOutputStream buffer = new ByteArrayOutputStream();
                 int nRead;
-                byte[] data = new byte[8000];
+                byte[] data = new byte[1024];
                 while ((nRead = is.read(data, 0, data.length)) != -1) {
                     buffer.write(data, 0, nRead);
                 }

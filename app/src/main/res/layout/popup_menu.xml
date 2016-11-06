@@ -1,0 +1,23 @@
+<menu  xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_height="match_parent"
+    android:layout_width="match_parent">>
+
+<item
+    android:id="@+id/one"
+    android:title="One"
+    android:layout_height="match_parent"
+    android:layout_width="match_parent" />
+
+<item
+    android:id="@+id/two"
+    android:title="Two"
+    android:layout_height="match_parent"
+    android:layout_width="match_parent" />
+
+<item
+    android:id="@+id/three"
+    android:title="Three"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" />
+
+</menu>
