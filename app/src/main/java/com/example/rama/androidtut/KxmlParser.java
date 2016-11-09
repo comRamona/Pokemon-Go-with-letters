@@ -19,12 +19,34 @@ public class KxmlParser {
     private static final String ns = null;
 
     public static class Placemark {
-        public final String name;
-        public final String description;
+        private final String name;
+        private final String description;
+        private final double lat;
+        private final double lng;
 
-        private Placemark(String name, String description) {
+        private Placemark(String name, String description,String lat,String lng) {
             this.name = name;
             this.description = description;
+            this.lat=Double.valueOf(lat);
+            this.lng=Double.valueOf(lng);
+        }
+
+        public String getName(){
+            return name;
+        }
+
+        public String getDescription(){
+            return description;
+        }
+
+        public double getLat(){
+            return lat;
+        }
+        public double getLng(){
+            return lng;
+        }
+        public String getAll(){
+            return lat+","+lng;
         }
     }
 
@@ -81,7 +103,7 @@ public class KxmlParser {
         parser.require(XmlPullParser.START_TAG, ns, "Placemark");
         String title = null;
         String summary = null;
-        String link = null;
+        String[] point = null;
         while (parser.next() != XmlPullParser.END_TAG) {
             if (parser.getEventType() != XmlPullParser.START_TAG) {
                 continue;
@@ -91,13 +113,38 @@ public class KxmlParser {
                 title = readName(parser);
             } else if (name.equals("description")) {
                 summary = readDescription(parser);
-            }else {
+            }else if(name.equals("Point")) {
+
+              point=readPoints(parser);
+
+              //  if(point.length<2) skip(parser);
+            }
+            else{
                 skip(parser);
             }
         }
-        return new Placemark(title, summary);
+        return new Placemark(title, summary,point[1],point[0]);
     }
 
+    private String[] readPoints(XmlPullParser parser) throws XmlPullParserException, IOException {
+        String[] coord=null;
+
+        parser.require(XmlPullParser.START_TAG, ns, "Point");
+        while (parser.next() != XmlPullParser.END_TAG) {
+            if (parser.getEventType() != XmlPullParser.START_TAG) {
+                continue;
+            }
+            String name = parser.getName();
+            // Starts by looking for the entry tag
+            if (name.equals("coordinates")) {
+                coord=(readCoord(parser));
+
+            } else {
+                skip(parser);
+            }
+        }
+        return coord;
+    }
     // Processes name tags in the feed.
     private String readName(XmlPullParser parser) throws IOException, XmlPullParserException {
         parser.require(XmlPullParser.START_TAG, ns, "name");
@@ -106,6 +153,21 @@ public class KxmlParser {
         return title;
     }
 
+
+    private String[] readPoint(XmlPullParser parser) throws IOException, XmlPullParserException {
+        parser.require(XmlPullParser.START_TAG, ns, "Point");
+        String[] coord = readCoord(parser);
+        parser.require(XmlPullParser.END_TAG, ns, "Point");
+        return coord;
+    }
+
+    private String[] readCoord(XmlPullParser parser) throws IOException, XmlPullParserException {
+        parser.require(XmlPullParser.START_TAG, ns, "coordinates");
+        String coord = readText(parser);
+        String[] latlonh=coord.split(",");
+        parser.require(XmlPullParser.END_TAG, ns, "coordinates");
+        return latlonh;
+    }
 
     // Processes summary tags in the feed.
     private String readDescription(XmlPullParser parser) throws IOException, XmlPullParserException {

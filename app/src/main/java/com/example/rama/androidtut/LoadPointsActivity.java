@@ -64,7 +64,7 @@ public class LoadPointsActivity extends AppCompatActivity {
            //Show entries on map
             if(result!=null) {
                 for (KxmlParser.Placemark e : result) {
-                    Log.i(TAG, e.name);
+                   // Log.i(TAG, e.lat+"");
                 }
             }
         }
