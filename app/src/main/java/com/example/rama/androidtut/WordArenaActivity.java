@@ -1,48 +1,41 @@
 package com.example.rama.androidtut;
 
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.Button;
-import android.widget.EditText;
 import android.widget.GridView;
-import android.widget.LinearLayout;
 
-import com.google.maps.android.kml.KmlLayer;
-
-import java.util.Map;
+import com.example.rama.androidtut.UtilityClasses.CustomGrid;
 
 
-public class NewWordActivity extends AppCompatActivity {
+public class WordArenaActivity extends AppCompatActivity {
 
-    static String TAG="NewWordActivity";
+    static String TAG = "WordArenaActivity";
     static int score;
     GridView grid;
 
     SharedPreferences sharedPref;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_new_word);
 
         sharedPref = this.getSharedPreferences(getString(R.string.preference_file_letters), Context.MODE_PRIVATE);
-        String[] letters=new String[]{"A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"};
-        int[] counts=new int[26];
-        for(int i=0;i<26;i++){
-            counts[i]=sharedPref.getInt(letters[i],0);
+        String[] letters = new String[]{"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"};
+        int[] counts = new int[26];
+        for (int i = 0; i < 26; i++) {
+            counts[i] = sharedPref.getInt(letters[i], 0);
         }
 
 
-        CustomGrid adapter = new CustomGrid(this, letters,counts);
-        grid=(GridView)findViewById(R.id.grid);
+        CustomGrid adapter = new CustomGrid(this, letters, counts);
+        grid = (GridView) findViewById(R.id.grid);
         grid.setAdapter(adapter);
         grid.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
@@ -54,12 +47,7 @@ public class NewWordActivity extends AppCompatActivity {
         });
 
 
-
-
-
-
     }
-
 
 
     @Override
@@ -68,7 +56,7 @@ public class NewWordActivity extends AppCompatActivity {
 
         super.onStop();
 
-        Log.i(TAG,"OnStop");
+        Log.i(TAG, "OnStop");
 
     }
 
@@ -77,7 +65,7 @@ public class NewWordActivity extends AppCompatActivity {
 
         super.onPause();
 
-        Log.i(TAG,"Paused");
+        Log.i(TAG, "Paused");
 
     }
 
@@ -87,7 +75,7 @@ public class NewWordActivity extends AppCompatActivity {
 
         super.onResume();
 
-        Log.i(TAG,"Resumed");
+        Log.i(TAG, "Resumed");
 
     }
 
@@ -97,7 +85,7 @@ public class NewWordActivity extends AppCompatActivity {
 
         super.onDestroy();
 
-        Log.i(TAG,"Destroyed");
+        Log.i(TAG, "Destroyed");
 
     }
 
@@ -107,22 +95,24 @@ public class NewWordActivity extends AppCompatActivity {
 
         super.onStart();
 
-        Log.i(TAG,"Started");
+        Log.i(TAG, "Started");
 
     }
+
     /**
      * Called when the user presses the Send button
+     *
      * @param view
      */
 
 
-    public void loadPoints(View view){
-        Intent intent=new Intent(this,LoadPointsActivity.class);
+    public void loadPoints(View view) {
+        Intent intent = new Intent(this, LoadPointsActivity.class);
         startActivity(intent);
     }
 
-    public void showMap(View view){
-        Intent intent = new Intent(this,CampusMapActivity.class);
+    public void showMap(View view) {
+        Intent intent = new Intent(this, CampusMapActivity.class);
         startActivity(intent);
     }
 }

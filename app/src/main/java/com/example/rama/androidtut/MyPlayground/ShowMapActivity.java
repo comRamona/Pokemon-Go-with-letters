@@ -1,31 +1,24 @@
-package com.example.rama.androidtut;
+package com.example.rama.androidtut.MyPlayground;
 
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
-import android.location.LocationManager;
+import android.os.Bundle;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
-import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.util.Log;
-import android.widget.EditText;
 import android.widget.TextView;
 
+import com.example.rama.androidtut.R;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.location.FusedLocationProviderApi;
-import com.google.android.gms.location.LocationAvailability;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.vision.text.Text;
 
 public class ShowMapActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
     GoogleApiClient mGoogleApiClient;
@@ -77,7 +70,6 @@ public class ShowMapActivity extends AppCompatActivity implements GoogleApiClien
         startLocationUpdates();
 
 
-
     }
 
     // Trigger new location updates at interval
@@ -112,7 +104,7 @@ public class ShowMapActivity extends AppCompatActivity implements GoogleApiClien
 
     }
 
-    public void onStart(){
+    public void onStart() {
         super.onStart();
         mGoogleApiClient.connect();
 
@@ -136,10 +128,11 @@ public class ShowMapActivity extends AppCompatActivity implements GoogleApiClien
 
 
     }
+
     /**
      * Function to show settings alert dialog
-     * */
-    public void showSettingsAlert(){
+     */
+    public void showSettingsAlert() {
         AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
 
         // Setting Dialog Title
@@ -153,7 +146,7 @@ public class ShowMapActivity extends AppCompatActivity implements GoogleApiClien
 
         // On pressing Settings button
         alertDialog.setPositiveButton("Settings", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog,int which) {
+            public void onClick(DialogInterface dialog, int which) {
                 Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
                 startActivity(intent);
             }
@@ -169,8 +162,6 @@ public class ShowMapActivity extends AppCompatActivity implements GoogleApiClien
         // Showing Alert Message
         alertDialog.show();
     }
-
-
 
 
 }

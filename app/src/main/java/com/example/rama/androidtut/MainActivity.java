@@ -1,22 +1,18 @@
 package com.example.rama.androidtut;
 
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
 
-import com.google.maps.android.kml.KmlLayer;
+import com.example.rama.androidtut.MyPlayground.DisplayMessageActivity;
 
 
 public class MainActivity extends AppCompatActivity {
     public final static String EXTRA_MESSAGE = "com.example.myfirstapp.MESSAGE";
-    static String TAG="MainActivity";
+    static String TAG = "MainActivity";
     static int score;
 
     @Override
@@ -34,14 +30,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-
     @Override
 
     protected void onStop() {
 
         super.onStop();
 
-        Log.i(TAG,"OnStop");
+        Log.i(TAG, "OnStop");
 
     }
 
@@ -50,7 +45,7 @@ public class MainActivity extends AppCompatActivity {
 
         super.onPause();
 
-        Log.i(TAG,"Paused");
+        Log.i(TAG, "Paused");
 
     }
 
@@ -60,7 +55,7 @@ public class MainActivity extends AppCompatActivity {
 
         super.onResume();
 
-        Log.i(TAG,"Resumed");
+        Log.i(TAG, "Resumed");
 
     }
 
@@ -70,7 +65,7 @@ public class MainActivity extends AppCompatActivity {
 
         super.onDestroy();
 
-        Log.i(TAG,"Destroyed");
+        Log.i(TAG, "Destroyed");
 
     }
 
@@ -80,30 +75,32 @@ public class MainActivity extends AppCompatActivity {
 
         super.onStart();
 
-        Log.i(TAG,"Started");
+        Log.i(TAG, "Started");
 
     }
+
     /**
      * Called when the user presses the Send button
+     *
      * @param view
      */
-    public void sendMessage(View view){
-        Intent intent=new Intent(this,DisplayMessageActivity.class);
-        EditText editText=(EditText) findViewById(R.id.edit_message);
+    public void sendMessage(View view) {
+        Intent intent = new Intent(this, DisplayMessageActivity.class);
+        EditText editText = (EditText) findViewById(R.id.edit_message);
         String message = editText.getText().toString();
-        intent.putExtra(EXTRA_MESSAGE,message);
+        intent.putExtra(EXTRA_MESSAGE, message);
         startActivity(intent);
-        score=message.length();
+        score = message.length();
 
     }
 
-    public void loadPoints(View view){
-        Intent intent=new Intent(this,LoadPointsActivity.class);
+    public void loadPoints(View view) {
+        Intent intent = new Intent(this, LoadPointsActivity.class);
         startActivity(intent);
     }
 
-    public void showMap(View view){
-        Intent intent = new Intent(this,CampusMapActivity.class);
+    public void showMap(View view) {
+        Intent intent = new Intent(this, CampusMapActivity.class);
         startActivity(intent);
     }
 }

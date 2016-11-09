@@ -1,15 +1,19 @@
-package com.example.rama.androidtut;
+package com.example.rama.androidtut.MyPlayground;
 
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.example.rama.androidtut.MainActivity;
+import com.example.rama.androidtut.R;
+
 public class DisplayMessageActivity extends AppCompatActivity {
 
-    static String TAG="DisplayMessageActivity";
+    static String TAG = "DisplayMessageActivity";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -29,7 +33,7 @@ public class DisplayMessageActivity extends AppCompatActivity {
 
         super.onStop();
 
-        Log.i(TAG,"OnStop");
+        Log.i(TAG, "OnStop");
 
     }
 
@@ -38,7 +42,7 @@ public class DisplayMessageActivity extends AppCompatActivity {
 
         super.onStop();
 
-        Log.i(TAG,"Paused");
+        Log.i(TAG, "Paused");
 
     }
 
@@ -48,7 +52,7 @@ public class DisplayMessageActivity extends AppCompatActivity {
 
         super.onStop();
 
-        Log.i(TAG,"Resumed");
+        Log.i(TAG, "Resumed");
 
     }
 
@@ -58,7 +62,7 @@ public class DisplayMessageActivity extends AppCompatActivity {
 
         super.onStop();
 
-        Log.i(TAG,"Destroyed");
+        Log.i(TAG, "Destroyed");
 
     }
 
@@ -68,7 +72,7 @@ public class DisplayMessageActivity extends AppCompatActivity {
 
         super.onStop();
 
-        Log.i(TAG,"Started");
+        Log.i(TAG, "Started");
 
     }
 }

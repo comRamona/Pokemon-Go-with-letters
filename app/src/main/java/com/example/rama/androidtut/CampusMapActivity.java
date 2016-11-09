@@ -1,45 +1,30 @@
 package com.example.rama.androidtut;
 
-import android.*;
-import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.graphics.drawable.ColorDrawable;
-import android.location.GpsStatus;
 import android.location.Location;
-import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.net.Uri;
 import android.os.AsyncTask;
-import android.provider.Settings;
-import android.support.annotation.NonNull;
+import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
-import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
-import android.widget.Button;
-import android.widget.LinearLayout;
-import android.widget.PopupMenu;
 import android.widget.PopupWindow;
 import android.widget.Toast;
 
-
+import com.example.rama.androidtut.UtilityClasses.KxmlParser;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
@@ -56,13 +41,10 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.maps.android.kml.KmlContainer;
 import com.google.maps.android.kml.KmlLayer;
 import com.google.maps.android.kml.KmlPlacemark;
-import com.google.maps.android.kml.KmlPolygon;
 
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -70,59 +52,50 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.List;
-import java.util.Scanner;
-
-import static java.security.AccessController.getContext;
 
 public class CampusMapActivity extends FragmentActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener, ResultCallback<LocationSettingsResult>, GoogleMap.OnInfoWindowClickListener {
 
-    protected static final String TAG = "CampusMapActivity";
-
-    private GoogleMap mMap;
-    private GoogleApiClient mGoogleApiClient;
-    private Location mCurrentLocation;
-    private LocationRequest mLocationRequest;
-    private LocationSettingsRequest mLocationSettingsRequest;
-    KmlLayer kmlLayer;
-    private boolean markers_loaded=false;
-    private FloatingActionButton fab;
-    private PopupWindow pwindo;
-    SharedPreferences sharedPref;
-    SharedPreferences markers;
-    SharedPreferences lastUpdated;
-    String currentDay;
-    String lastDownload;
-
-    protected static final String LOCATION_KEY = "location-key";
-    /**
-     * Constant used in the location settings dialog.
-     */
-    protected static final int REQUEST_CHECK_SETTINGS = 0x1;
     /**
      * The desired interval for location updates. Inexact. Updates may be more or less frequent.
      */
     public static final long UPDATE_INTERVAL_IN_MILLISECONDS = 10000;
-
     /**
      * The fastest rate for active location updates. Exact. Updates will never be more frequent
      * than this value.
      */
     public static final long FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS =
             UPDATE_INTERVAL_IN_MILLISECONDS / 2;
+    protected static final String TAG = "CampusMapActivity";
+    protected static final String LOCATION_KEY = "location-key";
+    /**
+     * Constant used in the location settings dialog.
+     */
+    protected static final int REQUEST_CHECK_SETTINGS = 0x1;
     /**
      * ATTENTION: This was auto-generated to implement the App Indexing API.
      * See https://g.co/AppIndexing/AndroidStudio for more information.
      */
 
     protected static final LatLng DEFAULT_EDINBURGH_LATLNG = new LatLng(55.946233, -3.192473);
+    KmlLayer kmlLayer;
+    SharedPreferences sharedPref;
+    SharedPreferences markers;
+    SharedPreferences lastUpdated;
+    String currentDay;
+    String lastDownload;
+    private GoogleMap mMap;
+    private GoogleApiClient mGoogleApiClient;
+    private Location mCurrentLocation;
+    private LocationRequest mLocationRequest;
+    private LocationSettingsRequest mLocationSettingsRequest;
+    private boolean markers_loaded = false;
+    private FloatingActionButton fab;
+    private PopupWindow pwindo;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -140,7 +113,7 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
         buildGoogleApiClient();
         createLocationRequest();
         buildLocationSettingsRequest();
-      fab=(FloatingActionButton) findViewById(R.id.fab);
+        fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -159,27 +132,26 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
         System.out.println("Current time => " + c.getTime());
 
         SimpleDateFormat df = new SimpleDateFormat("dd-MMM-yyyy");
-        lastDownload=lastUpdated.getString("lastDownload","00");
+        lastDownload = lastUpdated.getString("lastDownload", "00");
         currentDay = df.format(c.getTime());
-        System.out.println(currentDay+" lastDOwnload: "+lastDownload);
-
+        System.out.println(currentDay + " lastDOwnload: " + lastDownload);
 
 
     }
 
-    public void showOptionsDialog(){
+    public void showOptionsDialog() {
         try {
 // We need to get the instance of the LayoutInflater
             LayoutInflater inflater = (LayoutInflater) this
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             View layout = inflater.inflate(R.layout.popup_win,
                     (ViewGroup) findViewById(R.id.popup_element));
-            pwindo = new PopupWindow(layout, 800, 800,true);
+            pwindo = new PopupWindow(layout, 800, 800, true);
             pwindo.showAtLocation(layout, Gravity.CENTER, 0, 0);
             pwindo.setBackgroundDrawable(new ColorDrawable());
             layout.getBackground().setAlpha(240);
 
-            FloatingActionButton fab_close=(FloatingActionButton) layout.findViewById(R.id.fab_cancel);
+            FloatingActionButton fab_close = (FloatingActionButton) layout.findViewById(R.id.fab_cancel);
             fab_close.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -188,16 +160,16 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
                 }
             });
 
-            FloatingActionButton fab_new=(FloatingActionButton) layout.findViewById(R.id.fab_new);
+            FloatingActionButton fab_new = (FloatingActionButton) layout.findViewById(R.id.fab_new);
             fab_new.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Intent intent=new Intent(getApplicationContext(),NewWordActivity.class);
+                    Intent intent = new Intent(getApplicationContext(), WordArenaActivity.class);
                     startActivity(intent);
                 }
             });
 
-            FloatingActionButton fab_instr=(FloatingActionButton) layout.findViewById(R.id.fab_instr);
+            FloatingActionButton fab_instr = (FloatingActionButton) layout.findViewById(R.id.fab_instr);
             fab_instr.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -205,7 +177,7 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
                 }
             });
 
-            FloatingActionButton fab_stats=(FloatingActionButton) layout.findViewById(R.id.fab_stats);
+            FloatingActionButton fab_stats = (FloatingActionButton) layout.findViewById(R.id.fab_stats);
             fab_stats.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -213,15 +185,13 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
                 }
             });
 
-            FloatingActionButton fab_usr=(FloatingActionButton) layout.findViewById(R.id.fab_usr);
+            FloatingActionButton fab_usr = (FloatingActionButton) layout.findViewById(R.id.fab_usr);
             fab_usr.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     pwindo.dismiss();
                 }
             });
-
-
 
 
         } catch (Exception e) {
@@ -245,8 +215,8 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
                 mCurrentLocation = savedInstanceState.getParcelable(LOCATION_KEY);
             }
 
-            if(savedInstanceState.keySet().contains("lastDownloaded")){
-                lastDownload=savedInstanceState.getString("lastDownloaded");
+            if (savedInstanceState.keySet().contains("lastDownloaded")) {
+                lastDownload = savedInstanceState.getString("lastDownloaded");
             }
 
         }
@@ -339,19 +309,18 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
             latLng = new LatLng(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude());
         } else latLng = DEFAULT_EDINBURGH_LATLNG;
 
-         mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
-         mMap.setOnInfoWindowClickListener(this);
-       //  mMap.animateCamera(CameraUpdateFactory.zoomTo(8));
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+        mMap.setOnInfoWindowClickListener(this);
+        //  mMap.animateCamera(CameraUpdateFactory.zoomTo(8));
 
-        if(!currentDay.equals(lastDownload)) {
-            lastDownload=currentDay;
-            lastUpdated.edit().putString("lastDownload",lastDownload).commit();
+        if (!currentDay.equals(lastDownload)) {
+            lastDownload = currentDay;
+            lastUpdated.edit().putString("lastDownload", lastDownload).commit();
             loadThings();
 
-        }
-        else {
+        } else {
             System.out.println("We already downloaded this. Repopulate:");
-            Log.i("UIIII","repopulaaate");
+            Log.i("UIIII", "repopulaaate");
             repopulate();
         }
 
@@ -359,34 +328,35 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
 
     @Override
     public void onInfoWindowClick(Marker marker) {
-        String title=marker.getTitle();
-        int numberCollected = sharedPref.getInt(title,0);
+        String title = marker.getTitle();
+        int numberCollected = sharedPref.getInt(title, 0);
         SharedPreferences.Editor editor = sharedPref.edit();
-        editor.putInt(title, numberCollected+1);
+        editor.putInt(title, numberCollected + 1);
         editor.commit();
-        SharedPreferences.Editor m=markers.edit();
-        LatLng latLng=marker.getPosition();
-        m.remove(latLng.latitude+","+latLng.longitude);
+        SharedPreferences.Editor m = markers.edit();
+        LatLng latLng = marker.getPosition();
+        m.remove(latLng.latitude + "," + latLng.longitude);
         m.commit();
         marker.remove();
 
     }
 
-    public void repopulate(){
+    // method to restore game markers, if they have been already downloaded fr the day
+    public void repopulate() {
         mMap.clear();
-        for(String s:markers.getAll().keySet()){
-            String[] ll=s.split(",");
-            LatLng latLng=new LatLng(Double.parseDouble(ll[0]),Double.parseDouble(ll[1]));
-            mMap.addMarker(new MarkerOptions().position(latLng).title(markers.getString(s,"")));
+        for (String s : markers.getAll().keySet()) {
+            String[] ll = s.split(",");
+            LatLng latLng = new LatLng(Double.parseDouble(ll[0]), Double.parseDouble(ll[1]));
+            mMap.addMarker(new MarkerOptions().position(latLng).title(markers.getString(s, "")));
         }
     }
 
 
-    public void showSettingsAlert(){
+    public void showSettingsAlert() {
         AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
 
         // Setting Dialog Title
-        alertDialog.setTitle("GPS is settings");
+        alertDialog.setTitle("GPS settings");
 
         // Setting Dialog Message
         alertDialog.setMessage("GPS is not enabled. Do you want to go to settings menu?");
@@ -396,7 +366,7 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
 
         // On pressing Settings button
         alertDialog.setPositiveButton("Settings", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog,int which) {
+            public void onClick(DialogInterface dialog, int which) {
 
             }
         });
@@ -411,6 +381,7 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
         // Showing Alert Message
         alertDialog.show();
     }
+
     @Override
     public void onConnected(@Nullable Bundle bundle) {
         if (mCurrentLocation == null) {
@@ -537,6 +508,61 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
 
     }
 
+    public void loadThings() {
+        if (!markers_loaded) {
+            try {
+
+                Log.i(TAG, "Downloading map...");
+                ConnectivityManager connMgr = (ConnectivityManager)
+                        getSystemService(Context.CONNECTIVITY_SERVICE);
+                NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
+                if (networkInfo != null && networkInfo.isConnected()) {
+                    // fetch data
+
+                    String url = "http://www.inf.ed.ac.uk/teaching/courses/selp/coursework/sunday.kml";
+                    new DownloadLetters().execute(url);
+                } else {
+                    showInternetAlert();
+                }
+            } catch (Error e) {
+                Log.i(TAG, "load things failed");
+            }
+        }
+    }
+
+    public void showInternetAlert() {
+        AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
+
+        // Setting Dialog Title
+        alertDialog.setTitle("Could not download data.");
+
+        // Setting Dialog Message
+        alertDialog.setMessage("Internet is not enabled. Please try again.");
+
+        // Setting Icon to Dialog
+        //alertDialog.setIcon(R.drawable.delete);
+
+
+        // on pressing cancel button
+        alertDialog.setPositiveButton("Retry", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+                if (!markers_loaded) loadThings();
+            }
+        });
+
+        alertDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+
+            }
+        });
+
+        // Showing Alert Message
+        alertDialog.show();
+
+    }
+
     @Override
     protected void onStart() {
         super.onStart();
@@ -580,84 +606,12 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
         super.onSaveInstanceState(savedInstanceState);
         Log.i(TAG, "Saving the state");
         savedInstanceState.putParcelable(LOCATION_KEY, mCurrentLocation);
-        System.out.println("Saviiiing "+lastDownload);
-        savedInstanceState.putString("lastDownloaded",lastDownload);
+        savedInstanceState.putString("lastDownloaded", lastDownload);
 
     }
-
-    public void loadThings() {
-        if(!markers_loaded) {
-            try {
-                System.out.println("Downloading things..");
-                ConnectivityManager connMgr = (ConnectivityManager)
-                        getSystemService(Context.CONNECTIVITY_SERVICE);
-                NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
-                if (networkInfo != null && networkInfo.isConnected()) {
-                    // fetch data
-
-                    String url = "http://www.inf.ed.ac.uk/teaching/courses/selp/coursework/sunday.kml";
-                    new DownloadLetters().execute(url);
-                } else {
-                    showInternetAlert();
-                }
-            } catch (Error e) {
-                Log.i(TAG, "load things failed");
-            }
-        }
-    }
-    public void showInternetAlert(){
-        AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
-
-        // Setting Dialog Title
-        alertDialog.setTitle("Could not download data.");
-
-        // Setting Dialog Message
-        alertDialog.setMessage("Internet is not enabled. Please try again.");
-
-        // Setting Icon to Dialog
-        //alertDialog.setIcon(R.drawable.delete);
-
-
-        // on pressing cancel button
-        alertDialog.setPositiveButton("Retry", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.cancel();
-                if(!markers_loaded) loadThings();
-            }
-        });
-
-        alertDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.cancel();
-
-            }
-        });
-
-        // Showing Alert Message
-        alertDialog.show();
-
-    }
-
-
-//    private void moveCameraToKml(KmlLayer kmlLayer) {
-//        //Retrieve the first container in the KML layer
-//        KmlContainer container = kmlLayer.getContainers().iterator().next();
-//        //Retrieve a nested container within the first container
-//        container = container.getContainers().iterator().next();
-//        //Retrieve the first placemark in the nested container
-//        KmlPlacemark placemark = container.getPlacemarks().iterator().next();
-//        //Retrieve a polygon object in a placemark
-//        KmlPolygon polygon = (KmlPolygon) placemark.getGeometry();
-//        //Create LatLngBounds of the outer coordinates of the polygon
-//        LatLngBounds.Builder builder = new LatLngBounds.Builder();
-//        for (LatLng latLng : polygon.getOuterBoundaryCoordinates()) {
-//            builder.include(latLng);
-//        }
-//        mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(builder.build(), 1));
-//    }
 
     private class DownloadLettersTask extends AsyncTask<String, Void, byte[]> {
-//
+
 
         @Override
         protected byte[] doInBackground(String... params) {
@@ -674,7 +628,7 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
                 buffer.flush();
                 return buffer.toByteArray();
             } catch (IOException e) {
-               Log.i(TAG,e.getMessage());
+                Log.i(TAG, e.getMessage());
             }
             return null;
         }
@@ -684,27 +638,26 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
             try {
                 KmlLayer kmlLayer = new KmlLayer(mMap, new ByteArrayInputStream(byteArr),
                         getApplicationContext());
-               kmlLayer.addLayerToMap();
+                kmlLayer.addLayerToMap();
                 Iterable<KmlPlacemark> placemarks = kmlLayer.getPlacemarks();
                 //delete all previous markers
 
 
-                for(KmlPlacemark kp:placemarks){
-                   // System.out.println(kp.getProperties());
+                for (KmlPlacemark kp : placemarks) {
+                    // System.out.println(kp.getProperties());
 
 
-                   // System.out.println(kp.toString());
+                    // System.out.println(kp.toString());
 
                 }
 
                 // moveCameraToKml(kmlLayer);
             } catch (XmlPullParserException e) {
-                Log.i(TAG,e.getMessage());
+                Log.i(TAG, e.getMessage());
             } catch (IOException e) {
-                Log.i(TAG,e.getMessage());
+                Log.i(TAG, e.getMessage());
             }
         }
-
 
 
         // Given a string representation of a URL, sets up a connection and gets
@@ -731,10 +684,10 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
             try {
                 return loadXmlFromNetwork(urls[0]);
             } catch (IOException e) {
-                Log.i(TAG,"IO error, return null");
+                Log.i(TAG, "IO error, return null");
                 return null;
             } catch (XmlPullParserException e) {
-                Log.i(TAG,"Parsing error, return null"+e.getMessage());
+                Log.i(TAG, "Parsing error, return null" + e.getMessage());
                 return null;
             }
         }
@@ -747,16 +700,17 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
             //Show entries on map
             SharedPreferences.Editor edit = markers.edit();
             edit.clear().commit();
-            if(result!=null) {
+            if (result != null) {
                 for (KxmlParser.Placemark e : result) {
 
-                   Marker q= mMap.addMarker(new MarkerOptions().position(new LatLng(e.getLat(),e.getLng())).title(e.getDescription()).visible(true));
-
-                   edit.putString(e.getAll(),e.getDescription());
+                    Marker q = mMap.addMarker(new MarkerOptions().position(new LatLng(e.getLat(), e.getLng())).title(e.getDescription()).visible(true));
+                    //save markers for latter use
+                    edit.putString(e.getAll(), e.getDescription());
 
                 }
                 edit.commit();
             }
+            markers_loaded = true;
         }
 
         // Uploads XML from stackoverflow.com, parses it, and combines it with
@@ -766,7 +720,6 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
             // Instantiate the parser
             KxmlParser stackOverflowXmlParser = new KxmlParser();
             List<KxmlParser.Placemark> entries = null;
-
 
 
             try {
@@ -795,44 +748,6 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
             // Starts the query
             conn.connect();
             return conn.getInputStream();
-        }
-    }
-
-    private class DownloadKmlFile extends AsyncTask<String, Void, byte[]> {
-        private final String mUrl;
-
-        public DownloadKmlFile(String url) {
-            mUrl = url;
-        }
-
-        protected byte[] doInBackground(String... params) {
-            try {
-                InputStream is =  new URL(mUrl).openStream();
-                ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-                int nRead;
-                byte[] data = new byte[16384];
-                while ((nRead = is.read(data, 0, data.length)) != -1) {
-                    buffer.write(data, 0, nRead);
-                }
-                buffer.flush();
-                return buffer.toByteArray();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            return null;
-        }
-
-        protected void onPostExecute(byte[] byteArr) {
-            try {
-                KmlLayer kmlLayer = new KmlLayer(mMap, new ByteArrayInputStream(byteArr),
-                        getApplicationContext());
-                kmlLayer.addLayerToMap();
-
-            } catch (XmlPullParserException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
         }
     }
 

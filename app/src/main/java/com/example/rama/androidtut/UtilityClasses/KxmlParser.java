@@ -1,4 +1,4 @@
-package com.example.rama.androidtut;
+package com.example.rama.androidtut.UtilityClasses;
 
 import android.util.Xml;
 
@@ -18,38 +18,6 @@ public class KxmlParser {
     // We don't use namespaces
     private static final String ns = null;
 
-    public static class Placemark {
-        private final String name;
-        private final String description;
-        private final double lat;
-        private final double lng;
-
-        private Placemark(String name, String description,String lat,String lng) {
-            this.name = name;
-            this.description = description;
-            this.lat=Double.valueOf(lat);
-            this.lng=Double.valueOf(lng);
-        }
-
-        public String getName(){
-            return name;
-        }
-
-        public String getDescription(){
-            return description;
-        }
-
-        public double getLat(){
-            return lat;
-        }
-        public double getLng(){
-            return lng;
-        }
-        public String getAll(){
-            return lat+","+lng;
-        }
-    }
-
     public List parse(InputStream in) throws XmlPullParserException, IOException {
         try {
             XmlPullParser parser = Xml.newPullParser();
@@ -61,6 +29,7 @@ public class KxmlParser {
             in.close();
         }
     }
+
     private List readFeed(XmlPullParser parser) throws XmlPullParserException, IOException {
         List entries = new ArrayList();
 
@@ -79,6 +48,7 @@ public class KxmlParser {
         }
         return entries;
     }
+
     private void skip(XmlPullParser parser) throws XmlPullParserException, IOException {
         if (parser.getEventType() != XmlPullParser.START_TAG) {
             throw new IllegalStateException();
@@ -96,7 +66,6 @@ public class KxmlParser {
         }
     }
 
-
     // Parses the contents of an entry. If it encounters a name, summary, or description tag, hands them off
 // to their respective "read" methods for processing. Otherwise, skips the tag.
     private Placemark readEntry(XmlPullParser parser) throws XmlPullParserException, IOException {
@@ -113,21 +82,20 @@ public class KxmlParser {
                 title = readName(parser);
             } else if (name.equals("description")) {
                 summary = readDescription(parser);
-            }else if(name.equals("Point")) {
+            } else if (name.equals("Point")) {
 
-              point=readPoints(parser);
+                point = readPoints(parser);
 
-              //  if(point.length<2) skip(parser);
-            }
-            else{
+                //  if(point.length<2) skip(parser);
+            } else {
                 skip(parser);
             }
         }
-        return new Placemark(title, summary,point[1],point[0]);
+        return new Placemark(title, summary, point[1], point[0]);
     }
 
     private String[] readPoints(XmlPullParser parser) throws XmlPullParserException, IOException {
-        String[] coord=null;
+        String[] coord = null;
 
         parser.require(XmlPullParser.START_TAG, ns, "Point");
         while (parser.next() != XmlPullParser.END_TAG) {
@@ -137,7 +105,7 @@ public class KxmlParser {
             String name = parser.getName();
             // Starts by looking for the entry tag
             if (name.equals("coordinates")) {
-                coord=(readCoord(parser));
+                coord = (readCoord(parser));
 
             } else {
                 skip(parser);
@@ -145,6 +113,7 @@ public class KxmlParser {
         }
         return coord;
     }
+
     // Processes name tags in the feed.
     private String readName(XmlPullParser parser) throws IOException, XmlPullParserException {
         parser.require(XmlPullParser.START_TAG, ns, "name");
@@ -152,7 +121,6 @@ public class KxmlParser {
         parser.require(XmlPullParser.END_TAG, ns, "name");
         return title;
     }
-
 
     private String[] readPoint(XmlPullParser parser) throws IOException, XmlPullParserException {
         parser.require(XmlPullParser.START_TAG, ns, "Point");
@@ -164,7 +132,7 @@ public class KxmlParser {
     private String[] readCoord(XmlPullParser parser) throws IOException, XmlPullParserException {
         parser.require(XmlPullParser.START_TAG, ns, "coordinates");
         String coord = readText(parser);
-        String[] latlonh=coord.split(",");
+        String[] latlonh = coord.split(",");
         parser.require(XmlPullParser.END_TAG, ns, "coordinates");
         return latlonh;
     }
@@ -185,6 +153,40 @@ public class KxmlParser {
             parser.nextTag();
         }
         return result;
+    }
+
+    public static class Placemark {
+        private final String name;
+        private final String description;
+        private final double lat;
+        private final double lng;
+
+        private Placemark(String name, String description, String lat, String lng) {
+            this.name = name;
+            this.description = description;
+            this.lat = Double.valueOf(lat);
+            this.lng = Double.valueOf(lng);
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public String getDescription() {
+            return description;
+        }
+
+        public double getLat() {
+            return lat;
+        }
+
+        public double getLng() {
+            return lng;
+        }
+
+        public String getAll() {
+            return lat + "," + lng;
+        }
     }
 
 }

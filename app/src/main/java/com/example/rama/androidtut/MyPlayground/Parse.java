@@ -1,6 +1,8 @@
+package com.example.rama.androidtut.MyPlayground;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserFactory;
+
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -9,45 +11,45 @@ import java.net.URL;
  * Created by Sairamkrishna on 4/11/2015.
  */
 public class Parse {
+    public volatile boolean parsingComplete = true;
     private String country = "county";
     private String temperature = "temperature";
     private String humidity = "humidity";
     private String pressure = "pressure";
     private String urlString = null;
     private XmlPullParserFactory xmlFactoryObject;
-    public volatile boolean parsingComplete = true;
 
-    public Parse(String url){
+    public Parse(String url) {
         this.urlString = url;
     }
 
-    public String getCountry(){
+    public String getCountry() {
         return country;
     }
 
-    public String getTemperature(){
+    public String getTemperature() {
         return temperature;
     }
 
-    public String getHumidity(){
+    public String getHumidity() {
         return humidity;
     }
 
-    public String getPressure(){
+    public String getPressure() {
         return pressure;
     }
 
     public void parseXMLAndStoreIt(XmlPullParser myParser) {
         int event;
-        String text=null;
+        String text = null;
 
         try {
             event = myParser.getEventType();
 
             while (event != XmlPullParser.END_DOCUMENT) {
-                String name=myParser.getName();
+                String name = myParser.getName();
 
-                switch (event){
+                switch (event) {
                     case XmlPullParser.START_TAG:
                         break;
 
@@ -56,43 +58,33 @@ public class Parse {
                         break;
 
                     case XmlPullParser.END_TAG:
-                        if(name.equals("country")){
+                        if (name.equals("country")) {
                             country = text;
-                        }
-
-                        else if(name.equals("humidity")){
-                            humidity = myParser.getAttributeValue(null,"value");
-                        }
-
-                        else if(name.equals("pressure")){
-                            pressure = myParser.getAttributeValue(null,"value");
-                        }
-
-                        else if(name.equals("temperature")){
-                            temperature = myParser.getAttributeValue(null,"value");
-                        }
-
-                        else{
+                        } else if (name.equals("humidity")) {
+                            humidity = myParser.getAttributeValue(null, "value");
+                        } else if (name.equals("pressure")) {
+                            pressure = myParser.getAttributeValue(null, "value");
+                        } else if (name.equals("temperature")) {
+                            temperature = myParser.getAttributeValue(null, "value");
+                        } else {
                         }
                         break;
                 }
                 event = myParser.next();
             }
             parsingComplete = false;
-        }
-
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    public void fetchXML(){
-        Thread thread = new Thread(new Runnable(){
+    public void fetchXML() {
+        Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
                     URL url = new URL(urlString);
-                    HttpURLConnection conn = (HttpURLConnection)url.openConnection();
+                    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 
                     conn.setReadTimeout(10000 /* milliseconds */);
                     conn.setConnectTimeout(15000 /* milliseconds */);
@@ -109,8 +101,7 @@ public class Parse {
 
                     parseXMLAndStoreIt(myparser);
                     stream.close();
-                }
-                catch (Exception e) {
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
             }

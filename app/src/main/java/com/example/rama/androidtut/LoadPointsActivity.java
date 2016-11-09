@@ -4,11 +4,13 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.example.rama.androidtut.UtilityClasses.KxmlParser;
 
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -20,7 +22,7 @@ import java.util.Calendar;
 import java.util.List;
 
 public class LoadPointsActivity extends AppCompatActivity {
-    static String TAG="LoadPointsActivity";
+    static String TAG = "LoadPointsActivity";
 
     private TextView response;
 
@@ -36,22 +38,23 @@ public class LoadPointsActivity extends AppCompatActivity {
         if (networkInfo != null && networkInfo.isConnected()) {
             // fetch data
 
-            String url="http://www.inf.ed.ac.uk/teaching/courses/selp/coursework/sunday.kml";
+            String url = "http://www.inf.ed.ac.uk/teaching/courses/selp/coursework/sunday.kml";
             new DownloadLettersTask().execute(url);
         } else {
             Toast.makeText(this, "No network connection.", Toast.LENGTH_LONG).show();
         }
     }
+
     private class DownloadLettersTask extends AsyncTask<String, Void, List<KxmlParser.Placemark>> {
         @Override
         protected List<KxmlParser.Placemark> doInBackground(String... urls) {
             try {
                 return loadXmlFromNetwork(urls[0]);
             } catch (IOException e) {
-                Log.i(TAG,"IO error, return null");
+                Log.i(TAG, "IO error, return null");
                 return null;
             } catch (XmlPullParserException e) {
-                Log.i(TAG,"Parsing error, return null"+e.getMessage());
+                Log.i(TAG, "Parsing error, return null" + e.getMessage());
                 return null;
             }
         }
@@ -61,10 +64,10 @@ public class LoadPointsActivity extends AppCompatActivity {
 
             // Displays the HTML string in the UI via a WebView
 
-           //Show entries on map
-            if(result!=null) {
+            //Show entries on map
+            if (result != null) {
                 for (KxmlParser.Placemark e : result) {
-                   // Log.i(TAG, e.lat+"");
+                    // Log.i(TAG, e.lat+"");
                 }
             }
         }
