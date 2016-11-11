@@ -1,10 +1,12 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/popup_element"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/wallet_dim_foreground_disabled_holo_dark"
-    android:orientation="vertical">
+    android:background="@android:color/background_light"
+    android:orientation="vertical"
+    tools:background="@android:color/background_light">
 
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"

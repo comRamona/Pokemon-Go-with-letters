@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "11066006354",
+    "firebase_url": "https://androidtut-9f948.firebaseio.com",
+    "project_id": "androidtut-9f948",
+    "storage_bucket": "androidtut-9f948.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:11066006354:android:b2f12a7a509f16b8",
+        "android_client_info": {
+          "package_name": "com.example.rama.androidtut"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "11066006354-cfkh8iiid6cep4i6eb83q6eaf1t32a8u.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBvbmdQrbWJE5ZpNaalY-uGJxG3cKOdg_0"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

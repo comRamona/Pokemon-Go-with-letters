@@ -149,7 +149,7 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
             pwindo = new PopupWindow(layout, 800, 800, true);
             pwindo.showAtLocation(layout, Gravity.CENTER, 0, 0);
             pwindo.setBackgroundDrawable(new ColorDrawable());
-            layout.getBackground().setAlpha(240);
+           // layout.getBackground().setAlpha(240);
 
             FloatingActionButton fab_close = (FloatingActionButton) layout.findViewById(R.id.fab_cancel);
             fab_close.setOnClickListener(new View.OnClickListener() {
@@ -343,6 +343,7 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
 
     // method to restore game markers, if they have been already downloaded fr the day
     public void repopulate() {
+
         mMap.clear();
         for (String s : markers.getAll().keySet()) {
             String[] ll = s.split(",");
