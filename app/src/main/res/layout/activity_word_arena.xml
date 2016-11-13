@@ -49,21 +49,21 @@
         android:paddingLeft="16dp"
         android:paddingRight="16dp">
 
-        <android.support.design.widget.FloatingActionButton
-            android:id="@+id/fab_cancel"
+        <Button
+            android:id="@+id/no"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:clickable="true"
-            app:fabSize="mini"
-            app:srcCompat="@drawable/ic_close_light" />
-       
+            android:text="Cancel"
+            android:theme="@style/ThemeOverlay.MyDarkButton" />
+
         <Button
             android:id="@+id/yes"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="Submit"
+            android:onClick="checkWord"
             android:theme="@style/ThemeOverlay.MyDarkButton" />
     </LinearLayout>
 

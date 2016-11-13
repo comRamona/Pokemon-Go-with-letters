@@ -1,0 +1,63 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/show_instr"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/pop"
+    android:orientation="vertical"
+
+    android:weightSum="1">
+
+    <LinearLayout
+        android:layout_width="348dp"
+        android:layout_height="wrap_content"
+
+        android:orientation="vertical"
+        android:weightSum="1"
+        android:layout_weight="0.47">
+
+
+        <TextView
+            android:text="How to play:"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:id="@+id/textView1"
+            android:textAppearance="@style/TextAppearance.AppCompat.Display1" />
+
+
+        <TextView
+            android:text="Collect letters from all over the campus."
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:id="@+id/textView2"
+            android:textAppearance="@style/TextAppearance.AppCompat.Display1"
+            android:textSize="12sp"
+            android:layout_weight="0.32" />
+        <TextView
+            android:text="Form 7 letter words with your collected letters.."
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:id="@+id/textView3"
+            android:textAppearance="@style/TextAppearance.AppCompat.Display1"
+            android:textSize="12sp"
+            android:layout_weight="0.29" />
+
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/instr_cancel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:clickable="true"
+            app:fabSize="mini"
+            app:srcCompat="@drawable/ic_close_light"
+            android:layout_weight="0.11" />
+
+
+    </LinearLayout>
+
+
+</LinearLayout>

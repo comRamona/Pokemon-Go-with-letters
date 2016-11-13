@@ -3,11 +3,16 @@ package com.example.rama.androidtut;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.GridView;
+import android.widget.PopupWindow;
 import android.widget.TextView;
 
 import android.graphics.Color;
@@ -17,6 +22,13 @@ import android.widget.LinearLayout;
 
 
 import com.example.rama.androidtut.UtilityClasses.LetterAdapter;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 
 public class WordArenaActivity extends AppCompatActivity {
@@ -32,6 +44,10 @@ public class WordArenaActivity extends AppCompatActivity {
     private GridView letters;
     //letter button adapter
     private LetterAdapter ltrAdapt;
+    private DatabaseReference database;
+    private FirebaseAuth firebaseAuth;
+    private FirebaseUser user;
+    private PopupWindow pwindo;
     int chosen=0;
 
     @Override
@@ -69,6 +85,10 @@ public class WordArenaActivity extends AppCompatActivity {
             wordLayout.addView(charViews[c]);
 
         }
+        database = FirebaseDatabase.getInstance().getReference();
+        firebaseAuth= FirebaseAuth.getInstance();
+        user = firebaseAuth.getCurrentUser();
+
     }
 
 
@@ -136,20 +156,31 @@ public class WordArenaActivity extends AppCompatActivity {
 
     }
 
-    /**
-     * Called when the user presses the Send button
-     *
-     * @param view
-     */
 
 
-    public void loadPoints(View view) {
-        Intent intent = new Intent(this, LoadPointsActivity.class);
-        startActivity(intent);
-    }
 
-    public void showMap(View view) {
-        Intent intent = new Intent(this, CampusMapActivity.class);
-        startActivity(intent);
+
+    public void checkWord(View view) {
+        LayoutInflater inflater = (LayoutInflater) this
+                .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        View layout = inflater.inflate(R.layout.popup_word,
+                (ViewGroup) findViewById(R.id.show_word));
+        pwindo = new PopupWindow(layout, 800, 800, true);
+        pwindo.showAtLocation(layout, Gravity.CENTER, 0, 0);
+        pwindo.setBackgroundDrawable(new ColorDrawable());
+        FloatingActionButton fab_close = (FloatingActionButton) layout.findViewById(R.id.welldone_cancel);
+        fab_close.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                pwindo.dismiss();
+
+            }
+        });
+        score=20;
+        String name=user.getUid();
+        database.child("Scores").child(name).setValue(score);
+
+
+
     }
 }

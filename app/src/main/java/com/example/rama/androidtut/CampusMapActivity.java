@@ -46,7 +46,11 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.maps.android.kml.KmlLayer;
 import com.google.maps.android.kml.KmlPlacemark;
 
@@ -101,6 +105,9 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
     private FloatingActionButton fab;
     private PopupWindow pwindo;
     private FirebaseAuth mAuth;
+    private DatabaseReference database;
+    private FirebaseAuth firebaseAuth;
+    private FirebaseUser user;
     private FirebaseAuth.AuthStateListener mAuthListener;
     private String uid;
 
@@ -165,7 +172,7 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
                 // [END_EXCLUDE]
             }
         };
-        FirebaseDatabase.getInstance().setPersistenceEnabled(true);
+
     }
 
 
@@ -203,7 +210,8 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
             fab_instr.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    pwindo.dismiss();
+                    Intent intent = new Intent(getApplicationContext(), LeaderboardActivity.class);
+                    startActivity(intent);
                 }
             });
 

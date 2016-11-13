@@ -23,7 +23,7 @@
             android:clickable="true"
             app:fabSize="mini"
             app:srcCompat="@android:drawable/ic_menu_help"
-            android:id="@+id/floatingActionButton" />
+            android:id="@+id/help" />
 
         <ImageView
             android:id="@+id/icon"

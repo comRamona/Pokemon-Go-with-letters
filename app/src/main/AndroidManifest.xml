@@ -18,7 +18,7 @@
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
-        android:label="AndroidTut"
+        android:label="Grabble"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity android:name=".MainActivity">
@@ -28,8 +28,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".MyPlayground.DisplayMessageActivity" />
-        <activity android:name=".MyPlayground.ShowMapActivity" />
+
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
              (See the file "res/values/google_maps_api.xml").
@@ -48,12 +47,9 @@
         <activity
             android:name=".WordArenaActivity"
             android:label="Word Arena" />
-
         <activity
             android:name=".GoogleSignInActivity"
             android:label="Google" />
-
-
 
         <!--
  ATTENTION: This was auto-generated to add Google Play services to your project for
@@ -66,7 +62,8 @@
         <activity android:name=".LoadPointsActivity" />
         <activity
             android:name=".LoginActivity"
-            android:label="@string/title_activity_login"></activity>
+            android:label="@string/title_activity_login" />
+        <activity android:name=".LeaderboardActivity" android:label="Leaderboard"></activity>
     </application>
 
 </manifest>

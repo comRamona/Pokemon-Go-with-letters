@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/tableLayout1"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+
+
+    <TableRow
+        android:id="@+id/tableRowu"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="5dip" >
+
+        <Button
+
+            android:text="User" />
+
+        <Button
+            android:id="@+id/button14"
+            android:text="Score" />
+    </TableRow>
+
+
+    <!-- just draw a red line -->
+    <View
+        android:layout_height="2dip"
+        android:background="#FF0000" />
+
+    <!-- 2 columns -->
+    <TableRow
+        android:id="@+id/tableRow1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="5dip" >
+
+        <TextView
+
+            android:text="test@gmail.com"
+            android:textAppearance="?android:attr/textAppearanceLarge" />
+
+        <TextView
+
+            android:text="   40"
+            android:textAppearance="?android:attr/textAppearanceLarge" />
+
+
+    </TableRow>
+
+    <TableRow
+        android:id="@+id/tableRow2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="5dip" >
+
+        <TextView
+
+            android:text="user@gmail.com"
+            android:textAppearance="?android:attr/textAppearanceLarge" />
+
+        <TextView
+
+            android:text="   20"
+            android:textAppearance="?android:attr/textAppearanceLarge" />
+
+
+    </TableRow>
+
+
+</TableLayout>

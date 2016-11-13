@@ -42,8 +42,15 @@ public class LetterAdapter extends BaseAdapter {
         //instantiate alphabet array
         letters=new String[26];
         for(int a=0; a<letters.length; a++){
-            letters[a]=""+(char)(a+'A');
+            letters[a]=(char)(a+'A')+":0";
         }
+        letters[15]=(char)(15+'A')+":1";
+        letters[2]=(char)(2+'A')+":2";
+        letters[5]=(char)(5+'A')+":5";
+        letters[7]=(char)(7+'A')+":3";
+        letters[8]=(char)(8+'A')+":1";
+        letters[20]=(char)(20+'A')+":2";
+        letters[21]=(char)(21+'A')+":4";
         //specify layout to inflate
         letterInf = LayoutInflater.from(c);
     }

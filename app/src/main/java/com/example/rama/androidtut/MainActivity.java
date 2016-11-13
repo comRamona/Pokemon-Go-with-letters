@@ -1,13 +1,20 @@
 package com.example.rama.androidtut;
 
+import android.content.Context;
 import android.content.Intent;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -27,6 +34,7 @@ public class MainActivity extends BaseActivity implements
         private TextView mStatusTextView;
         private EditText mEmailField;
         private EditText mPasswordField;
+        private PopupWindow pwindo;
 
         // [START declare_auth]
         private FirebaseAuth mAuth;
@@ -70,10 +78,41 @@ public class MainActivity extends BaseActivity implements
                                 }
                                 // [START_EXCLUDE]
                                 updateUI(user);
+
                                 // [END_EXCLUDE]
                         }
                 };
                 // [END auth_state_listener]
+
+                FloatingActionButton fab_close = (FloatingActionButton) findViewById(R.id.help);
+                fab_close.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                                LayoutInflater inflater = (LayoutInflater) MainActivity.this
+                                        .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                                View layout = inflater.inflate(R.layout.popup_instr,
+                                        (ViewGroup) findViewById(R.id.show_instr));
+                                pwindo = new PopupWindow(layout,900,800,true);
+                                pwindo.showAtLocation(layout, Gravity.CENTER, 0, 0);
+                                pwindo.setBackgroundDrawable(new ColorDrawable());
+                                FloatingActionButton fab_close = (FloatingActionButton) layout.findViewById(R.id.instr_cancel);
+                                fab_close.setOnClickListener(new View.OnClickListener() {
+                                        @Override
+                                        public void onClick(View v) {
+                                                pwindo.dismiss();
+
+                                        }
+                                });
+
+                        }
+                });
+
+
+
+
+
+
+
         }
 
         // [START on_start_add_listener]
@@ -81,7 +120,12 @@ public class MainActivity extends BaseActivity implements
         public void onStart() {
                 super.onStart();
                 mAuth.addAuthStateListener(mAuthListener);
+
+
+
         }
+
+
 // [END on_start_add_listener]
 
         // [START on_stop_remove_listener]
@@ -204,6 +248,7 @@ public class MainActivity extends BaseActivity implements
                         findViewById(R.id.email_password_fields).setVisibility(View.VISIBLE);
                         findViewById(R.id.start_game_button).setVisibility(View.GONE);
                 }
+
         }
 
         @Override

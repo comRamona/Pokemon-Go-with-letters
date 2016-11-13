@@ -5,7 +5,7 @@
 
     <!-- Specify a gradient for the background -->
 
-    <solid android:color="#E1BEE7"/>
+    <solid android:color="@color/WhiteSmoke"/>
     <!-- Specify a dark blue border -->
     <stroke
         android:width="2dp"
