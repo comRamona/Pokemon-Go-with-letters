@@ -12,6 +12,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.FragmentActivity;
@@ -43,6 +44,9 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.maps.android.kml.KmlLayer;
 import com.google.maps.android.kml.KmlPlacemark;
 
@@ -96,6 +100,9 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
     private boolean markers_loaded = false;
     private FloatingActionButton fab;
     private PopupWindow pwindo;
+    private FirebaseAuth mAuth;
+    private FirebaseAuth.AuthStateListener mAuthListener;
+    private String uid;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -135,9 +142,32 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
         lastDownload = lastUpdated.getString("lastDownload", "00");
         currentDay = df.format(c.getTime());
         System.out.println(currentDay + " lastDOwnload: " + lastDownload);
+        mAuth = FirebaseAuth.getInstance();
+        // [END initialize_auth]
 
+        mAuth = FirebaseAuth.getInstance();
+        // [END initialize_auth]
 
+        // [START auth_state_listener]
+        mAuthListener = new FirebaseAuth.AuthStateListener() {
+            @Override
+            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                FirebaseUser user = firebaseAuth.getCurrentUser();
+                if (user != null) {
+                    // User is signed in
+                    uid= user.getUid();
+                } else {
+                    // User is signed out
+                    Log.d(TAG, "onAuthStateChanged:signed_out");
+                }
+                // [START_EXCLUDE]
+
+                // [END_EXCLUDE]
+            }
+        };
+        FirebaseDatabase.getInstance().setPersistenceEnabled(true);
     }
+
 
     public void showOptionsDialog() {
         try {
@@ -149,7 +179,7 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
             pwindo = new PopupWindow(layout, 800, 800, true);
             pwindo.showAtLocation(layout, Gravity.CENTER, 0, 0);
             pwindo.setBackgroundDrawable(new ColorDrawable());
-           // layout.getBackground().setAlpha(240);
+            // layout.getBackground().setAlpha(240);
 
             FloatingActionButton fab_close = (FloatingActionButton) layout.findViewById(R.id.fab_cancel);
             fab_close.setOnClickListener(new View.OnClickListener() {
@@ -169,7 +199,7 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
                 }
             });
 
-            FloatingActionButton fab_instr = (FloatingActionButton) layout.findViewById(R.id.fab_instr);
+            FloatingActionButton fab_instr = (FloatingActionButton) layout.findViewById(R.id.fab_leaderboard);
             fab_instr.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -185,7 +215,7 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
                 }
             });
 
-            FloatingActionButton fab_usr = (FloatingActionButton) layout.findViewById(R.id.fab_usr);
+            FloatingActionButton fab_usr = (FloatingActionButton) layout.findViewById(R.id.fab_challenges);
             fab_usr.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -753,4 +783,3 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
     }
 
 }
-

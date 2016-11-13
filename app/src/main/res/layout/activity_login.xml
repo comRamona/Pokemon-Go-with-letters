@@ -1,10 +1,13 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/grey_100"
     android:orientation="vertical"
+    android:label="Grabble"
+    tools:context=".MainActivity">
     android:weightSum="4">
 
     <LinearLayout
@@ -14,20 +17,28 @@
         android:gravity="center_horizontal"
         android:orientation="vertical">
 
+        <android.support.design.widget.FloatingActionButton
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:clickable="true"
+            app:fabSize="mini"
+            app:srcCompat="@android:drawable/ic_menu_help"
+            android:id="@+id/floatingActionButton" />
+
         <ImageView
             android:id="@+id/icon"
             style="@style/ThemeOverlay.FirebaseIcon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:contentDescription="@string/desc_firebase_lockup"
-            android:src="@drawable/firebase_lockup_400" />
+            android:src="@drawable/grabble" />
 
         <TextView
             android:id="@+id/title_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="@dimen/title_bottom_margin"
-            android:text="@string/emailpassword_title_text"
+            android:text="Welcome!"
             android:theme="@style/ThemeOverlay.MyTitleText" />
 
         <TextView
@@ -99,14 +110,16 @@
         </LinearLayout>
 
 
-            <Button
-                android:id="@+id/start_game_button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+        <Button
+            android:id="@+id/start_game_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:text="StartGame"
+            android:visibility="gone"
+            android:theme="@style/ThemeOverlay.MyDarkButton" />
 
-                android:text="StartGame"
-                android:visibility="gone"
-                android:theme="@style/ThemeOverlay.MyDarkButton" />
+
 
 
 

@@ -1,5 +1,6 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="fill_parent"
     android:background="@color/WhiteSmoke"
@@ -40,5 +41,31 @@
         android:stretchMode="columnWidth"
         android:verticalSpacing="10dp" />
 
-</LinearLayout>
+    <LinearLayout
+        android:id="@+id/yes_no_buttons"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp">
 
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/fab_cancel"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:clickable="true"
+            app:fabSize="mini"
+            app:srcCompat="@drawable/ic_close_light" />
+       
+        <Button
+            android:id="@+id/yes"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Submit"
+            android:theme="@style/ThemeOverlay.MyDarkButton" />
+    </LinearLayout>
+
+
+</LinearLayout>
