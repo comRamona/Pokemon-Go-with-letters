@@ -11,6 +11,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.GridView;
 import android.widget.PopupWindow;
 import android.widget.TextView;
@@ -30,6 +31,12 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.io.File;
+import java.io.InputStream;
+import java.util.HashSet;
+import java.util.Scanner;
+import java.util.Set;
+
 
 public class WordArenaActivity extends AppCompatActivity {
 
@@ -43,11 +50,13 @@ public class WordArenaActivity extends AppCompatActivity {
     //letter button grid
     private GridView letters;
     //letter button adapter
+    private Button submitButton;
     private LetterAdapter ltrAdapt;
     private DatabaseReference database;
     private FirebaseAuth firebaseAuth;
     private FirebaseUser user;
     private PopupWindow pwindo;
+    private Set<String> dictionary;
     int chosen=0;
 
     @Override
@@ -58,6 +67,8 @@ public class WordArenaActivity extends AppCompatActivity {
         sharedPref = this.getSharedPreferences(getString(R.string.preference_file_letters), Context.MODE_PRIVATE);
 
 
+        submitButton = (Button) findViewById(R.id.yes);
+        submitButton.setEnabled(false);
         //create new array for character text views
         charViews = new TextView[7];
 
@@ -73,13 +84,9 @@ public class WordArenaActivity extends AppCompatActivity {
         //loop through characters
         for (int c = 0; c < 7; c++) {
             charViews[c] = new TextView(this);
-            //set the current letter
-           // charViews[c].setText("_");
-            //set layout
             charViews[c].setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT,
                     LayoutParams.WRAP_CONTENT));
             charViews[c].setGravity(Gravity.CENTER);
-           // charViews[c].setTextColor(Color.WHITE);
             charViews[c].setBackgroundResource(R.drawable.letter_bg);
             //add to display
             wordLayout.addView(charViews[c]);
@@ -88,12 +95,27 @@ public class WordArenaActivity extends AppCompatActivity {
         database = FirebaseDatabase.getInstance().getReference();
         firebaseAuth= FirebaseAuth.getInstance();
         user = firebaseAuth.getCurrentUser();
-
+        loadDictionary();
+        Log.i(TAG,dictionary.size()+"");
     }
 
 
+    private void loadDictionary(){
+        dictionary=new HashSet<>();
+        try {
+            InputStream inputStream = getResources().openRawResource(R.raw.grabdict);
+            Scanner scanner = new Scanner(inputStream);
+            while (scanner.hasNextLine()) {
+                String word = scanner.nextLine().toUpperCase();
+                dictionary.add(word);
+            }
+        }
+        catch(Exception e){
+            Log.e(TAG,"Could not load dictionary",e);
+        }
+    }
     public void letterPressed(View view) {
-        System.out.println("you clickeed");
+
         //user has pressed a letter to guess
         String ltr=((TextView)view).getText().toString();
         char letterChar = ltr.charAt(0);
@@ -102,6 +124,9 @@ public class WordArenaActivity extends AppCompatActivity {
             charViews[chosen].setText(letterChar+"");
             charViews[chosen].setTextColor(Color.BLACK);
             chosen++;
+        }
+        if(chosen==7) {
+            submitButton.setEnabled(true);
         }
     }
 
@@ -176,11 +201,24 @@ public class WordArenaActivity extends AppCompatActivity {
 
             }
         });
+        TextView textView=(TextView) layout.findViewById(R.id.tvcheckWord);
+        String word=getCurrentWord();
+        String response=word+" is not a valid word. Try again!";
+        if(dictionary.contains(word)){
+            response="You have discovered a new word!\n"+word;
+        }
+        textView.setText(response);
         score=20;
         String name=user.getUid();
         database.child("Scores").child(name).setValue(score);
 
 
 
+    }
+    public String getCurrentWord(){
+        StringBuilder sb=new StringBuilder();
+        for(int i=0;i<7;i++)
+            sb.append(charViews[i].getText());
+        return sb.toString().toUpperCase();
     }
 }

@@ -6,25 +6,29 @@ import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
-import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.rama.androidtut.MyPlayground.DisplayMessageActivity;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
+
+/**
+ * Start screen that launches when user initialized the app. If the user has never registered, it will display a sign up form.
+ * The user can either launch a help screen or start the game, which will take him to the campus map.
+ */
 
 public class MainActivity extends BaseActivity implements
         View.OnClickListener {
@@ -36,13 +40,12 @@ public class MainActivity extends BaseActivity implements
         private EditText mPasswordField;
         private PopupWindow pwindo;
 
-        // [START declare_auth]
-        private FirebaseAuth mAuth;
-// [END declare_auth]
 
-        // [START declare_auth_listener]
+        // declare_auth]
+        private FirebaseAuth mAuth;
+
+        // declare_auth_listener]
         private FirebaseAuth.AuthStateListener mAuthListener;
-// [END declare_auth_listener]
 
         @Override
         public void onCreate(Bundle savedInstanceState) {
@@ -76,14 +79,12 @@ public class MainActivity extends BaseActivity implements
                                         // User is signed out
                                         Log.d(TAG, "onAuthStateChanged:signed_out");
                                 }
-                                // [START_EXCLUDE]
                                 updateUI(user);
-
-                                // [END_EXCLUDE]
                         }
                 };
                 // [END auth_state_listener]
 
+                // display instructions pop up
                 FloatingActionButton fab_close = (FloatingActionButton) findViewById(R.id.help);
                 fab_close.setOnClickListener(new View.OnClickListener() {
                         @Override
@@ -136,7 +137,6 @@ public class MainActivity extends BaseActivity implements
                         mAuth.removeAuthStateListener(mAuthListener);
                 }
         }
-// [END on_stop_remove_listener]
 
         private void createAccount(String email, String password) {
                 Log.d(TAG, "createAccount:" + email);
@@ -235,8 +235,6 @@ public class MainActivity extends BaseActivity implements
                 hideProgressDialog();
                 if (user != null) {
                         mStatusTextView.setText(getString(R.string.emailpassword_status_fmt, user.getEmail()));
-
-
                         findViewById(R.id.email_password_buttons).setVisibility(View.GONE);
                         findViewById(R.id.email_password_fields).setVisibility(View.GONE);
                         findViewById(R.id.start_game_button).setVisibility(View.VISIBLE);

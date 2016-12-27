@@ -66,6 +66,8 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.List;
 
+import static com.google.android.gms.analytics.internal.zzy.cl;
+
 public class CampusMapActivity extends FragmentActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener, ResultCallback<LocationSettingsResult>, GoogleMap.OnInfoWindowClickListener {
 
     /**
@@ -106,7 +108,7 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
     private PopupWindow pwindo;
     private FirebaseAuth mAuth;
     private DatabaseReference database;
-    private FirebaseAuth firebaseAuth;
+
     private FirebaseUser user;
     private FirebaseAuth.AuthStateListener mAuthListener;
     private String uid;
@@ -152,8 +154,6 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
         mAuth = FirebaseAuth.getInstance();
         // [END initialize_auth]
 
-        mAuth = FirebaseAuth.getInstance();
-        // [END initialize_auth]
 
         // [START auth_state_listener]
         mAuthListener = new FirebaseAuth.AuthStateListener() {
@@ -172,6 +172,10 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
                 // [END_EXCLUDE]
             }
         };
+        database = FirebaseDatabase.getInstance().getReference();
+
+        user = mAuth.getCurrentUser();
+
 
     }
 
@@ -351,19 +355,40 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
         mMap.setOnInfoWindowClickListener(this);
         //  mMap.animateCamera(CameraUpdateFactory.zoomTo(8));
 
-        if (!currentDay.equals(lastDownload)) {
-            lastDownload = currentDay;
-            lastUpdated.edit().putString("lastDownload", lastDownload).commit();
-            loadThings();
+        System.out.println(markers.getAll().size());
+//        if (!currentDay.equals(lastDownload)||markers.getAll().size()<1) {
+//            lastDownload = currentDay;
+//            lastUpdated.edit().putString("lastDownload", lastDownload).commit();
+//            String name=user.getUid();
+//            //different day, remove previous stored markers and download new ones
+//            database.child("Markers").child(name).removeValue(new DatabaseReference.CompletionListener() {
+//                @Override
+//                public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+//                    loadThings();
+//                }
+//            });
+//        }
+//                else {
+//            System.out.println("We already downloaded this. Repopulate:");
+//            Log.i("UIIII", "repopulaaate");
+//            repopulate();
+//            loadThings();
+//        }
+        String name=user.getUid();
+        database.child("Markers").child(name).removeValue(new DatabaseReference.CompletionListener() {
+            @Override
+            public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                loadThings();
+            }
+        });
 
-        } else {
-            System.out.println("We already downloaded this. Repopulate:");
-            Log.i("UIIII", "repopulaaate");
-            repopulate();
-        }
 
     }
 
+    /**
+     * A new letter was collected and it will be added to the user's inventory
+     * @param marker
+     */
     @Override
     public void onInfoWindowClick(Marker marker) {
         String title = marker.getTitle();
@@ -379,9 +404,8 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
 
     }
 
-    // method to restore game markers, if they have been already downloaded fr the day
+    // method to restore game markers, if they have been already downloaded for the day
     public void repopulate() {
-
         mMap.clear();
         for (String s : markers.getAll().keySet()) {
             String[] ll = s.split(",");
@@ -738,6 +762,7 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
 
             //Show entries on map
             SharedPreferences.Editor edit = markers.edit();
+            // first, erase previous markers
             edit.clear().commit();
             if (result != null) {
                 for (KxmlParser.Placemark e : result) {
@@ -745,7 +770,9 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
                     Marker q = mMap.addMarker(new MarkerOptions().position(new LatLng(e.getLat(), e.getLng())).title(e.getDescription()).visible(true));
                     //save markers for latter use
                     edit.putString(e.getAll(), e.getDescription());
-
+                    String name=user.getUid();
+                    database.child("Markers").child(name).push().child("lat").setValue(e.getLat());
+                    database.child("Markers").child(name).push().child("lng").setValue(e.getLng());
                 }
                 edit.commit();
             }

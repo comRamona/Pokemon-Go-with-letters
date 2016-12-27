@@ -1,6 +1,7 @@
 package com.example.rama.androidtut.UtilityClasses;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,23 +10,11 @@ import android.widget.BaseAdapter;
 import android.widget.Button;
 
 import com.example.rama.androidtut.R;
+import com.google.android.gms.maps.model.LatLng;
+
 
 /**
- * This is demo code to accompany the Mobiletuts+ tutorial:
- * - Android SDK: Create a Hangman Game
- *
- * Sue Smith - January 2014
- */
-
-import android.content.Context;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.BaseAdapter;
-import android.widget.Button;
-
-/**
- * This is demo code to accompany the Mobiletuts+ tutorial:
+ * This is using demo code to accompany the Mobiletuts+ tutorial:
  * - Android SDK: Create a Hangman Game
  *
  * Sue Smith - January 2014
@@ -33,26 +22,25 @@ import android.widget.Button;
 
 public class LetterAdapter extends BaseAdapter {
 
+    // shared preferences
+    private SharedPreferences sharedPref;
     //store letters
     private String[] letters;
     //inflater for button layout
     private LayoutInflater letterInf;
 
-    public LetterAdapter(Context c) {
+    public LetterAdapter(Context context) {
         //instantiate alphabet array
         letters=new String[26];
+        sharedPref = context.getSharedPreferences(context.getString(R.string.preference_file_letters), Context.MODE_PRIVATE);
         for(int a=0; a<letters.length; a++){
-            letters[a]=(char)(a+'A')+":0";
+            String letter=(char)(a+'A')+"";
+            int numberCollected = sharedPref.getInt(letter, 0);
+            letters[a]=letter+":"+numberCollected;
         }
-        letters[15]=(char)(15+'A')+":1";
-        letters[2]=(char)(2+'A')+":2";
-        letters[5]=(char)(5+'A')+":5";
-        letters[7]=(char)(7+'A')+":3";
-        letters[8]=(char)(8+'A')+":1";
-        letters[20]=(char)(20+'A')+":2";
-        letters[21]=(char)(21+'A')+":4";
+
         //specify layout to inflate
-        letterInf = LayoutInflater.from(c);
+        letterInf = LayoutInflater.from(context);
     }
 
     @Override
