@@ -63,8 +63,10 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Map;
 
 import static com.google.android.gms.analytics.internal.zzy.cl;
 
@@ -94,7 +96,7 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
     protected static final LatLng DEFAULT_EDINBURGH_LATLNG = new LatLng(55.946233, -3.192473);
     KmlLayer kmlLayer;
     SharedPreferences sharedPref;
-    SharedPreferences markers;
+
     SharedPreferences lastUpdated;
     String currentDay;
     String lastDownload;
@@ -108,10 +110,12 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
     private PopupWindow pwindo;
     private FirebaseAuth mAuth;
     private DatabaseReference database;
+    private DatabaseReference ref;
 
     private FirebaseUser user;
     private FirebaseAuth.AuthStateListener mAuthListener;
     private String uid;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -140,8 +144,7 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
         Context context = this.getApplicationContext();
         sharedPref = context.getSharedPreferences(
                 getString(R.string.preference_file_letters), Context.MODE_PRIVATE);
-        markers = context.getSharedPreferences(
-                ("saved_markers"), Context.MODE_PRIVATE);
+
         lastUpdated = context.getSharedPreferences(
                 ("lastDownload"), Context.MODE_PRIVATE);
         Calendar c = Calendar.getInstance();
@@ -176,6 +179,29 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
 
         user = mAuth.getCurrentUser();
 
+        ref = database.child("Markers").child(user.getUid());
+
+
+
+
+
+
+    }
+
+    private void collectOldMarkers(Map<String,Object> mymarkers) {
+
+        if(mymarkers==null) { loadThings(); return; }
+        for (Map.Entry<String, Object> entry : mymarkers.entrySet()){
+
+            //Get user map
+            Map singleUser = (Map) entry.getValue();
+            //Get phone field and append to list
+            LatLng latLng=new LatLng((double)singleUser.get("lat"),(double)singleUser.get("lng"));
+            mMap.addMarker(new MarkerOptions().position(latLng).title((String) singleUser.get("name")).snippet("reloaded"));
+
+        }
+
+        Log.i(TAG,"Numer of Markers: "+mymarkers.size());
 
     }
 
@@ -355,32 +381,23 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
         mMap.setOnInfoWindowClickListener(this);
         //  mMap.animateCamera(CameraUpdateFactory.zoomTo(8));
 
-        System.out.println(markers.getAll().size());
-//        if (!currentDay.equals(lastDownload)||markers.getAll().size()<1) {
-//            lastDownload = currentDay;
-//            lastUpdated.edit().putString("lastDownload", lastDownload).commit();
-//            String name=user.getUid();
-//            //different day, remove previous stored markers and download new ones
-//            database.child("Markers").child(name).removeValue(new DatabaseReference.CompletionListener() {
-//                @Override
-//                public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
-//                    loadThings();
-//                }
-//            });
-//        }
-//                else {
-//            System.out.println("We already downloaded this. Repopulate:");
-//            Log.i("UIIII", "repopulaaate");
-//            repopulate();
-//            loadThings();
-//        }
-        String name=user.getUid();
-        database.child("Markers").child(name).removeValue(new DatabaseReference.CompletionListener() {
-            @Override
-            public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
-                loadThings();
-            }
-        });
+        if (!currentDay.equals(lastDownload)) {
+            lastDownload = currentDay;
+            lastUpdated.edit().putString("lastDownload", lastDownload).commit();
+            String name=user.getUid();
+            //different day, remove previous stored markers and download new ones
+            database.child("Markers").child(name).removeValue(new DatabaseReference.CompletionListener() {
+                @Override
+                public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                    loadThings();
+                }
+            });
+        }
+                else {
+            System.out.println("We already downloaded this. Repopulate:");
+            Log.i("UIIII", "repopulaaate");
+            repopulate();
+        }
 
 
     }
@@ -396,22 +413,33 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
         SharedPreferences.Editor editor = sharedPref.edit();
         editor.putInt(title, numberCollected + 1);
         editor.commit();
-        SharedPreferences.Editor m = markers.edit();
-        LatLng latLng = marker.getPosition();
-        m.remove(latLng.latitude + "," + latLng.longitude);
-        m.commit();
+
+        String key=(marker.getPosition().latitude+"!"+marker.getPosition().longitude).replaceAll("\\.",",");
         marker.remove();
+        ref.child(key).removeValue();
 
     }
 
     // method to restore game markers, if they have been already downloaded for the day
     public void repopulate() {
         mMap.clear();
-        for (String s : markers.getAll().keySet()) {
-            String[] ll = s.split(",");
-            LatLng latLng = new LatLng(Double.parseDouble(ll[0]), Double.parseDouble(ll[1]));
-            mMap.addMarker(new MarkerOptions().position(latLng).title(markers.getString(s, "")));
-        }
+
+        ref.addListenerForSingleValueEvent(
+                new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        //Get map of users in datasnapshot
+                        collectOldMarkers((Map<String,Object>) dataSnapshot.getValue());
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError error) {
+                        // Failed to read value
+                        Log.w("TAG", "Failed to read value.", error.toException());
+                    }
+                });
+
+//
     }
 
 
@@ -761,20 +789,23 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
             // Displays the HTML string in the UI via a WebView
 
             //Show entries on map
-            SharedPreferences.Editor edit = markers.edit();
+
             // first, erase previous markers
-            edit.clear().commit();
+
             if (result != null) {
                 for (KxmlParser.Placemark e : result) {
 
-                    Marker q = mMap.addMarker(new MarkerOptions().position(new LatLng(e.getLat(), e.getLng())).title(e.getDescription()).visible(true));
+                    mMap.addMarker(new MarkerOptions().position(new LatLng(e.getLat(), e.getLng())).title(e.getDescription()).visible(true));
                     //save markers for latter use
-                    edit.putString(e.getAll(), e.getDescription());
-                    String name=user.getUid();
-                    database.child("Markers").child(name).push().child("lat").setValue(e.getLat());
-                    database.child("Markers").child(name).push().child("lng").setValue(e.getLng());
+
+
+                    DatabaseReference newMarker = ref.child(e.getAll());
+                    newMarker.child("lat").setValue(e.getLat());
+                    newMarker.child("lng").setValue(e.getLng());
+                    newMarker.child("name").setValue(e.getDescription());
+
                 }
-                edit.commit();
+
             }
             markers_loaded = true;
         }
