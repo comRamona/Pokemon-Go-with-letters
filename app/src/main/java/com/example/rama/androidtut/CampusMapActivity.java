@@ -165,10 +165,9 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
         letterCounts=new int[26];
         letterRefs=new DatabaseReference[26];
         for(int i=0;i<26;i++){
-            String letter=(char)(i+'A')+"";
-            letterRefs[i]=gamePlayDb.child("Letters").child(letter).getRef();
-            letterRefs[i].setValue(0);
             final int j=i;
+            String letter = (char) (i + 'A') + "";
+            letterRefs[i]=gamePlayDb.child("Letters").child(letter).getRef();
             letterRefs[i].addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
@@ -181,12 +180,6 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
                 }
             });
         }
-
-        letterRefs[2].setValue(3);
-
-
-
-
 
 
     }
@@ -855,4 +848,8 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
         }
     }
 
+    @Override
+    public void onBackPressed() {
+        moveTaskToBack(true);
+    }
 }

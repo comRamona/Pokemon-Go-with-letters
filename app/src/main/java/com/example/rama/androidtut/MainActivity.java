@@ -23,6 +23,8 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 
 /**
@@ -62,8 +64,8 @@ public class MainActivity extends BaseActivity implements
                 findViewById(R.id.email_sign_in_button).setOnClickListener(this);
                 findViewById(R.id.email_create_account_button).setOnClickListener(this);
                 findViewById(R.id.start_game_button).setOnClickListener(this);
-
-                // [START initialize_auth]
+                findViewById(R.id.sign_out_button).setOnClickListener(this);
+                 // [START initialize_auth]
                 mAuth = FirebaseAuth.getInstance();
                 // [END initialize_auth]
 
@@ -159,6 +161,10 @@ public class MainActivity extends BaseActivity implements
                                         if (!task.isSuccessful()) {
                                                 Toast.makeText(MainActivity.this, R.string.auth_failed,
                                                         Toast.LENGTH_SHORT).show();
+
+                                        }
+                                        else {
+                                            newUserDatabaseCreation();
                                         }
 
                                         // [START_EXCLUDE]
@@ -238,6 +244,7 @@ public class MainActivity extends BaseActivity implements
                         findViewById(R.id.email_password_buttons).setVisibility(View.GONE);
                         findViewById(R.id.email_password_fields).setVisibility(View.GONE);
                         findViewById(R.id.start_game_button).setVisibility(View.VISIBLE);
+                        findViewById(R.id.sign_out_button).setVisibility(View.VISIBLE);
                 } else {
                         mStatusTextView.setText(R.string.signed_out);
 
@@ -245,6 +252,7 @@ public class MainActivity extends BaseActivity implements
                         findViewById(R.id.email_password_buttons).setVisibility(View.VISIBLE);
                         findViewById(R.id.email_password_fields).setVisibility(View.VISIBLE);
                         findViewById(R.id.start_game_button).setVisibility(View.GONE);
+                        findViewById(R.id.sign_out_button).setVisibility(View.GONE);
                 }
 
         }
@@ -261,5 +269,27 @@ public class MainActivity extends BaseActivity implements
                         Intent intent = new Intent(getApplicationContext(), CampusMapActivity.class);
                         startActivity(intent);
                 }
+            else if ( i == R.id.sign_out_button) {
+                    signOut();
+                }
         }
+
+    /**
+     * Method initialize database holding default values for new user
+     */
+    public void newUserDatabaseCreation(){
+
+        DatabaseReference database = FirebaseDatabase.getInstance().getReference();
+
+        FirebaseUser user = mAuth.getCurrentUser();
+
+        DatabaseReference gamePlayDb = database.child("GamePlay").child(user.getUid());
+        for (int i = 0; i < 26; i++) {
+            String letter = (char) (i + 'A') + "";
+            gamePlayDb.child("Letters").child(letter).setValue(0);
+            gamePlayDb.child("lastDownload").setValue("");
+
+        }
+        database.child("Scores").child(user.getUid()).setValue(0);
+    }
 }
