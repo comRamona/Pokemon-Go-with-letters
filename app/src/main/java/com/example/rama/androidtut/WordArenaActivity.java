@@ -94,6 +94,7 @@ public class WordArenaActivity extends AppCompatActivity {
                     LayoutParams.WRAP_CONTENT));
             charViews[c].setGravity(Gravity.CENTER);
             charViews[c].setBackgroundResource(R.drawable.letter_bg);
+            charViews[c].setTextSize(16);
             //add to display
             wordLayout.addView(charViews[c]);
 
@@ -263,6 +264,7 @@ public class WordArenaActivity extends AppCompatActivity {
 
 
         }
+        textView.setTextSize(18);
         textView.setText(response);
 
 
