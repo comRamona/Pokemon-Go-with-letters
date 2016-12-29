@@ -23,7 +23,6 @@ import com.google.android.gms.maps.model.LatLng;
 public class LetterAdapter extends BaseAdapter {
 
     // shared preferences
-    private SharedPreferences sharedPref;
     //store letters
     private String[] letters;
     //inflater for button layout
@@ -32,15 +31,29 @@ public class LetterAdapter extends BaseAdapter {
     public LetterAdapter(Context context) {
         //instantiate alphabet array
         letters=new String[26];
-        sharedPref = context.getSharedPreferences(context.getString(R.string.preference_file_letters), Context.MODE_PRIVATE);
+
         for(int a=0; a<letters.length; a++){
             String letter=(char)(a+'A')+"";
-            int numberCollected = sharedPref.getInt(letter, 0);
-            letters[a]=letter+":"+numberCollected;
+
+            letters[a]=letter+":";
         }
 
         //specify layout to inflate
         letterInf = LayoutInflater.from(context);
+    }
+
+    public void updateCount(int position,int val){
+        String text=(char)(position+'A')+":"+val;
+        letters[position]=text;
+        notifyDataSetChanged();
+    }
+
+    public void reset(int[] count){
+        for(int i=0;i<26;i++) {
+            String text = (char) (i + 'A') + ":" + count[i];
+            letters[i] = text;
+        }
+        notifyDataSetChanged();
     }
 
     @Override
@@ -72,5 +85,7 @@ public class LetterAdapter extends BaseAdapter {
         letterBtn.setText(letters[position]);
         return letterBtn;
     }
+
+
 
 }

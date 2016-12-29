@@ -23,6 +23,7 @@ import android.widget.LinearLayout;
 
 
 import com.example.rama.androidtut.UtilityClasses.LetterAdapter;
+import com.example.rama.androidtut.UtilityClasses.LetterValues;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -41,7 +42,7 @@ import java.util.Set;
 public class WordArenaActivity extends AppCompatActivity {
 
     static String TAG = "WordArenaActivity";
-    static int score;
+    private int score;
     GridView grid;
 
     SharedPreferences sharedPref;
@@ -55,8 +56,13 @@ public class WordArenaActivity extends AppCompatActivity {
     private DatabaseReference database;
     private FirebaseAuth firebaseAuth;
     private FirebaseUser user;
+    private DatabaseReference gamePlayDb;
+    private DatabaseReference[] letterRefs;
+    private int[] letterCounts;
+    private DatabaseReference scoreDb;
     private PopupWindow pwindo;
     private Set<String> dictionary;
+    private int[] temporaryCount;
     int chosen=0;
 
     @Override
@@ -96,6 +102,42 @@ public class WordArenaActivity extends AppCompatActivity {
         firebaseAuth= FirebaseAuth.getInstance();
         user = firebaseAuth.getCurrentUser();
         loadDictionary();
+        scoreDb=database.child("Scores").child(user.getUid()).getRef();
+        scoreDb.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                score=dataSnapshot.getValue(Integer.class);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+        gamePlayDb=database.child("GamePlay").child(user.getUid());
+        letterCounts=new int[26];
+        temporaryCount=new int[26];
+        letterRefs=new DatabaseReference[26];
+        for(int i=0;i<26;i++){
+            final int j=i;
+            String letter = (char) (i + 'A') + "";
+            letterRefs[i]=gamePlayDb.child("Letters").child(letter).getRef();
+
+            letterRefs[i].addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    letterCounts[j]= dataSnapshot.getValue(Integer.class);
+                    temporaryCount[j]=letterCounts[j];
+                    ltrAdapt.updateCount(j,letterCounts[j]);
+
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });}
         Log.i(TAG,dictionary.size()+"");
     }
 
@@ -118,8 +160,14 @@ public class WordArenaActivity extends AppCompatActivity {
 
         //user has pressed a letter to guess
         String ltr=((TextView)view).getText().toString();
+
+        //can only press letter if more than 0 count
+        if(temporaryCount[ltr.charAt(0)-'A']<=0) return;
+        String newText=ltr.charAt(0)+":"+(letterCounts[ltr.charAt(0)-'A']-1);
+        temporaryCount[ltr.charAt(0)-'A']--;
+        ((TextView)view).setText(newText);
         char letterChar = ltr.charAt(0);
-        view.setBackgroundResource(R.drawable.letter_down);
+       // view.setBackgroundResource(R.drawable.letter_down);
         if(chosen<7) {
             charViews[chosen].setText(letterChar+"");
             charViews[chosen].setTextColor(Color.BLACK);
@@ -181,9 +229,11 @@ public class WordArenaActivity extends AppCompatActivity {
 
     }
 
-
-
-
+    public void refreshScreen(View view){
+        ltrAdapt.reset(letterCounts);
+        for(int i=0;i<7;i++)
+            charViews[i].setText("");
+    }
 
     public void checkWord(View view) {
         LayoutInflater inflater = (LayoutInflater) this
@@ -206,19 +256,37 @@ public class WordArenaActivity extends AppCompatActivity {
         String response=word+" is not a valid word. Try again!";
         if(dictionary.contains(word)){
             response="You have discovered a new word!\n"+word;
+            int scoreToAdd=calculateScore(word);
+            int newScore=score+scoreToAdd;
+            scoreDb.setValue(newScore);
+            updateCounts(word);
+
+
         }
         textView.setText(response);
-        score=20;
-        String name=user.getUid();
-        database.child("Scores").child(name).setValue(score);
 
 
+    }
 
+    private int calculateScore(String word){
+        int sc=0;
+        for(int i=0;i<word.length();i++){
+            sc+=LetterValues.getValue(word.charAt(i));
+        }
+        return sc;
     }
     public String getCurrentWord(){
         StringBuilder sb=new StringBuilder();
         for(int i=0;i<7;i++)
             sb.append(charViews[i].getText());
         return sb.toString().toUpperCase();
+    }
+
+    public void updateCounts(String word){
+        for(int i=0;i<word.length();i++){
+            int pos=word.charAt(i)-'A';
+            int t=temporaryCount[pos];
+            letterRefs[pos].setValue(t-1);
+        }
     }
 }

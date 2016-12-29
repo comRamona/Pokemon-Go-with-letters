@@ -90,10 +90,6 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
      */
 
     protected static final LatLng DEFAULT_EDINBURGH_LATLNG = new LatLng(55.946233, -3.192473);
-    KmlLayer kmlLayer;
-    SharedPreferences sharedPref;
-
-    SharedPreferences lastUpdated;
     String currentDay;
     String lastDownload;
     private int[] letterCounts;
@@ -110,6 +106,7 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
     private DatabaseReference markersDb;
     private DatabaseReference gamePlayDb;
     private DatabaseReference[] letterRefs;
+    private DatabaseReference lastUpdatedRef;
     private FirebaseUser user;
 
 
@@ -138,19 +135,14 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
             }
         });
 
-        Context context = this.getApplicationContext();
-        sharedPref = context.getSharedPreferences(
-                getString(R.string.preference_file_letters), Context.MODE_PRIVATE);
 
-        lastUpdated = context.getSharedPreferences(
-                ("lastDownload"), Context.MODE_PRIVATE);
         Calendar c = Calendar.getInstance();
         System.out.println("Current time => " + c.getTime());
 
         SimpleDateFormat df = new SimpleDateFormat("dd-MMM-yyyy");
-        lastDownload = lastUpdated.getString("lastDownload", "00");
+
         currentDay = df.format(c.getTime());
-        System.out.println(currentDay + " lastDOwnload: " + lastDownload);
+
         mAuth = FirebaseAuth.getInstance();
         // [END initialize_auth]
 
@@ -168,7 +160,8 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
             final int j=i;
             String letter = (char) (i + 'A') + "";
             letterRefs[i]=gamePlayDb.child("Letters").child(letter).getRef();
-            letterRefs[i].addListenerForSingleValueEvent(new ValueEventListener() {
+
+            letterRefs[i].addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     letterCounts[j]= dataSnapshot.getValue(Integer.class);
@@ -180,6 +173,19 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
                 }
             });
         }
+
+        lastUpdatedRef=gamePlayDb.child("lastDownload").getRef();
+        lastUpdatedRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                lastDownload=dataSnapshot.getValue(String.class);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
 
 
     }
@@ -383,7 +389,7 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
 
         if (!currentDay.equals(lastDownload)) {
             lastDownload = currentDay;
-            lastUpdated.edit().putString("lastDownload", lastDownload).commit();
+            lastUpdatedRef.setValue(lastDownload);
             String name=user.getUid();
             //different day, remove previous stored markers and download new ones
             database.child("Markers").child(name).removeValue(new DatabaseReference.CompletionListener() {
@@ -408,15 +414,15 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
      */
     @Override
     public void onInfoWindowClick(Marker marker) {
-        String title = marker.getTitle();
-        int numberCollected = sharedPref.getInt(title, 0);
-        SharedPreferences.Editor editor = sharedPref.edit();
-        editor.putInt(title, numberCollected + 1);
-        editor.commit();
 
         String key=(marker.getPosition().latitude+"!"+marker.getPosition().longitude).replaceAll("\\.",",");
         marker.remove();
         markersDb.child(key).removeValue();
+
+        String title = marker.getTitle();
+        int i=title.charAt(0)-'A';
+        int oldVal=letterCounts[i];
+        letterRefs[i].setValue(oldVal+1);
 
     }
 
