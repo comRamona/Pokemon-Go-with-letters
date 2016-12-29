@@ -184,7 +184,7 @@ public class KxmlParser {
             return lng;
         }
 
-        public String getAll() {
+        public String getAsKey() {
             return (lat + "!" + lng).replaceAll("\\.",",");
         }
     }

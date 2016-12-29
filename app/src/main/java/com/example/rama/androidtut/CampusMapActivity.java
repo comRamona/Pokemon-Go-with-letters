@@ -12,7 +12,6 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.FragmentActivity;
@@ -63,12 +62,9 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
-
-import static com.google.android.gms.analytics.internal.zzy.cl;
 
 public class CampusMapActivity extends FragmentActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener, ResultCallback<LocationSettingsResult>, GoogleMap.OnInfoWindowClickListener {
 
@@ -100,6 +96,7 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
     SharedPreferences lastUpdated;
     String currentDay;
     String lastDownload;
+    private int[] letterCounts;
     private GoogleMap mMap;
     private GoogleApiClient mGoogleApiClient;
     private Location mCurrentLocation;
@@ -110,11 +107,11 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
     private PopupWindow pwindo;
     private FirebaseAuth mAuth;
     private DatabaseReference database;
-    private DatabaseReference ref;
-
+    private DatabaseReference markersDb;
+    private DatabaseReference gamePlayDb;
+    private DatabaseReference[] letterRefs;
     private FirebaseUser user;
-    private FirebaseAuth.AuthStateListener mAuthListener;
-    private String uid;
+
 
 
     @Override
@@ -158,28 +155,34 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
         // [END initialize_auth]
 
 
-        // [START auth_state_listener]
-        mAuthListener = new FirebaseAuth.AuthStateListener() {
-            @Override
-            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-                FirebaseUser user = firebaseAuth.getCurrentUser();
-                if (user != null) {
-                    // User is signed in
-                    uid= user.getUid();
-                } else {
-                    // User is signed out
-                    Log.d(TAG, "onAuthStateChanged:signed_out");
-                }
-                // [START_EXCLUDE]
-
-                // [END_EXCLUDE]
-            }
-        };
         database = FirebaseDatabase.getInstance().getReference();
 
         user = mAuth.getCurrentUser();
 
-        ref = database.child("Markers").child(user.getUid());
+        markersDb = database.child("Markers").child(user.getUid());
+
+        gamePlayDb=database.child("GamePlay").child(user.getUid());
+        letterCounts=new int[26];
+        letterRefs=new DatabaseReference[26];
+        for(int i=0;i<26;i++){
+            String letter=(char)(i+'A')+"";
+            letterRefs[i]=gamePlayDb.child("Letters").child(letter).getRef();
+            letterRefs[i].setValue(0);
+            final int j=i;
+            letterRefs[i].addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    letterCounts[j]= dataSnapshot.getValue(Integer.class);
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+        }
+
+        letterRefs[2].setValue(3);
 
 
 
@@ -190,7 +193,10 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
 
     private void collectOldMarkers(Map<String,Object> mymarkers) {
 
-        if(mymarkers==null) { loadThings(); return; }
+        if(mymarkers==null) {
+            System.out.println("My markers is null");
+            loadThings(); return; }
+        System.out.println("Size is: "+mymarkers.size());
         for (Map.Entry<String, Object> entry : mymarkers.entrySet()){
 
             //Get user map
@@ -204,6 +210,7 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
         Log.i(TAG,"Numer of Markers: "+mymarkers.size());
 
     }
+
 
 
     public void showOptionsDialog() {
@@ -416,7 +423,7 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
 
         String key=(marker.getPosition().latitude+"!"+marker.getPosition().longitude).replaceAll("\\.",",");
         marker.remove();
-        ref.child(key).removeValue();
+        markersDb.child(key).removeValue();
 
     }
 
@@ -424,7 +431,7 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
     public void repopulate() {
         mMap.clear();
 
-        ref.addListenerForSingleValueEvent(
+        markersDb.addListenerForSingleValueEvent(
                 new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
@@ -799,7 +806,7 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
                     //save markers for latter use
 
 
-                    DatabaseReference newMarker = ref.child(e.getAll());
+                    DatabaseReference newMarker = markersDb.child(e.getAsKey());
                     newMarker.child("lat").setValue(e.getLat());
                     newMarker.child("lng").setValue(e.getLng());
                     newMarker.child("name").setValue(e.getDescription());
