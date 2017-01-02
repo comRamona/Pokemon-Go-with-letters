@@ -18,6 +18,7 @@ import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.rama.androidtut.UtilityClasses.ScoreItem;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
@@ -290,6 +291,9 @@ public class MainActivity extends BaseActivity implements
             gamePlayDb.child("lastDownload").setValue("");
 
         }
-        database.child("Scores").child(user.getUid()).setValue(0);
+            ScoreItem scoreItem=new ScoreItem(user.getEmail(),0);
+            database.child("Scores").child(user.getUid()).setValue(scoreItem);
+//        database.child("Scores").child(user.getUid()).child("email").setValue(user.getEmail());
+//            database.child("Scores").child(user.getUid()).child("score").setValue(0);
     }
 }

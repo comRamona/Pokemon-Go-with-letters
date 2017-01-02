@@ -24,6 +24,7 @@ import android.widget.LinearLayout;
 
 import com.example.rama.androidtut.UtilityClasses.LetterAdapter;
 import com.example.rama.androidtut.UtilityClasses.LetterValues;
+import com.example.rama.androidtut.UtilityClasses.ScoreItem;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -94,7 +95,7 @@ public class WordArenaActivity extends AppCompatActivity {
                     LayoutParams.WRAP_CONTENT));
             charViews[c].setGravity(Gravity.CENTER);
             charViews[c].setBackgroundResource(R.drawable.letter_bg);
-            charViews[c].setTextSize(16);
+            charViews[c].setTextSize(20);
             //add to display
             wordLayout.addView(charViews[c]);
 
@@ -107,12 +108,13 @@ public class WordArenaActivity extends AppCompatActivity {
         scoreDb.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                score=dataSnapshot.getValue(Integer.class);
+                score=dataSnapshot.getValue(ScoreItem.class).getScore();
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
 
+                Log.e(TAG,databaseError.getMessage());
             }
         });
 
@@ -136,7 +138,7 @@ public class WordArenaActivity extends AppCompatActivity {
 
                 @Override
                 public void onCancelled(DatabaseError databaseError) {
-
+                    Log.e(TAG,databaseError.getMessage());
                 }
             });}
         Log.i(TAG,dictionary.size()+"");
@@ -264,7 +266,7 @@ public class WordArenaActivity extends AppCompatActivity {
 
 
         }
-        textView.setTextSize(18);
+        textView.setTextSize(24);
         textView.setText(response);
 
 
