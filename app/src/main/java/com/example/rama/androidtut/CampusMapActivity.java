@@ -63,7 +63,9 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 public class CampusMapActivity extends FragmentActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener, ResultCallback<LocationSettingsResult>, GoogleMap.OnInfoWindowClickListener {
@@ -194,7 +196,8 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
 
         if(mymarkers==null) {
             System.out.println("My markers is null");
-            loadThings(); return; }
+            loadThings(); return;
+        }
         System.out.println("Size is: "+mymarkers.size());
         for (Map.Entry<String, Object> entry : mymarkers.entrySet()){
 
@@ -384,6 +387,7 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
         } else latLng = DEFAULT_EDINBURGH_LATLNG;
 
         mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+
         mMap.setOnInfoWindowClickListener(this);
         //  mMap.animateCamera(CameraUpdateFactory.zoomTo(8));
 
@@ -415,14 +419,29 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
     @Override
     public void onInfoWindowClick(Marker marker) {
 
-        String key=(marker.getPosition().latitude+"!"+marker.getPosition().longitude).replaceAll("\\.",",");
-        marker.remove();
-        markersDb.child(key).removeValue();
 
-        String title = marker.getTitle();
-        int i=title.charAt(0)-'A';
-        int oldVal=letterCounts[i];
-        letterRefs[i].setValue(oldVal+1);
+        Location lastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+        LatLng position = marker.getPosition();
+        //store distance in meters from clicked marker
+        float[] results = new float[1];
+        Location.distanceBetween(lastLocation.getLatitude(), lastLocation.getLongitude(),
+                position.latitude, position.longitude, results);
+        Log.i(TAG,"Distance from marker is "+results[0]);
+       if(results[0]<=15) {
+           //replace ! with . since databse doesnt allow certain characters in keys
+           showDialog("Congratulations!","You have collected letter "+marker.getTitle()+"!");
+           String key = (marker.getPosition().latitude + "!" + marker.getPosition().longitude).replaceAll("\\.", ",");
+           marker.remove();
+           markersDb.child(key).removeValue();
+
+           String title = marker.getTitle();
+           int i = title.charAt(0) - 'A';
+           int oldVal = letterCounts[i];
+           letterRefs[i].setValue(oldVal + 1);
+       }
+        else {
+           showDialog("Try again","Sorry, you are too far away from this letter!");
+       }
 
     }
 
@@ -447,6 +466,8 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
 
 //
     }
+
+
 
 
     public void showSettingsAlert() {
@@ -614,15 +635,19 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
                         getSystemService(Context.CONNECTIVITY_SERVICE);
                 NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
                 if (networkInfo != null && networkInfo.isConnected()) {
+                    Calendar calendar = Calendar.getInstance();
+                    Date date = calendar.getTime();
+                   // full name form of the day
+                    String day = new SimpleDateFormat("EEEE", Locale.ENGLISH).format(date.getTime());
+                    String url = getResources().getString(R.string.lettersurl)+day.toLowerCase()+".kml";
+                    System.out.println(url);
                     // fetch data
-
-                    String url = "http://www.inf.ed.ac.uk/teaching/courses/selp/coursework/sunday.kml";
                     new DownloadLetters().execute(url);
                 } else {
                     showInternetAlert();
                 }
             } catch (Error e) {
-                Log.i(TAG, "load things failed");
+                Log.i(TAG, "Loading markers failed"+e.getMessage());
             }
         }
     }
@@ -857,5 +882,18 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
     @Override
     public void onBackPressed() {
         moveTaskToBack(true);
+    }
+
+    public void showDialog(String title,String message){
+        AlertDialog alertDialog = new AlertDialog.Builder(this).create();
+        alertDialog.setTitle(title);
+        alertDialog.setMessage(message);
+        alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                });
+        alertDialog.show();
     }
 }
