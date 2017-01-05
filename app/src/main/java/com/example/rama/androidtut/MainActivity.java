@@ -18,6 +18,7 @@ import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.rama.androidtut.UtilityClasses.Challenge;
 import com.example.rama.androidtut.UtilityClasses.ScoreItem;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -288,12 +289,24 @@ public class MainActivity extends BaseActivity implements
         for (int i = 0; i < 26; i++) {
             String letter = (char) (i + 'A') + "";
             gamePlayDb.child("Letters").child(letter).setValue(0);
-            gamePlayDb.child("lastDownload").setValue("");
 
         }
+            gamePlayDb.child("lastDownload").setValue("");
             ScoreItem scoreItem=new ScoreItem(user.getEmail(),0);
             database.child("Scores").child(user.getUid()).setValue(scoreItem);
 //        database.child("Scores").child(user.getUid()).child("email").setValue(user.getEmail());
 //            database.child("Scores").child(user.getUid()).child("score").setValue(0);
+            DatabaseReference challengesDb=database.child("Challenges").child(user.getUid());
+            database.child("Statistics").child(user.getUid()).child("TotalWords").setValue(0);
+            Challenge a=new Challenge("play2days");
+            Challenge b=new Challenge("100letters");
+            Challenge c=new Challenge("5each");
+            Challenge d=new Challenge("eachletterword");
+            Challenge e=new Challenge("score2000");
+            challengesDb.child("play2days").setValue(a);
+            challengesDb.child("100letters").setValue(b);
+            challengesDb.child("5each").setValue(c);
+            challengesDb.child("eachletterword").setValue(d);
+            challengesDb.child("score2000").setValue(e);
     }
 }

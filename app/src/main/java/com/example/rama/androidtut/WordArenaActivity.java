@@ -22,6 +22,7 @@ import android.view.ViewGroup.LayoutParams;
 import android.widget.LinearLayout;
 
 
+import com.example.rama.androidtut.UtilityClasses.ChallengeManager;
 import com.example.rama.androidtut.UtilityClasses.LetterAdapter;
 import com.example.rama.androidtut.UtilityClasses.LetterValues;
 import com.example.rama.androidtut.UtilityClasses.ScoreItem;
@@ -64,6 +65,7 @@ public class WordArenaActivity extends AppCompatActivity {
     private PopupWindow pwindo;
     private Set<String> dictionary;
     private int[] temporaryCount;
+    private ChallengeManager challengeManager;
     int chosen=0;
 
     @Override
@@ -142,6 +144,8 @@ public class WordArenaActivity extends AppCompatActivity {
                 }
             });}
         Log.i(TAG,dictionary.size()+"");
+
+        challengeManager=ChallengeManager.getInstance(this);
     }
 
 
@@ -259,11 +263,13 @@ public class WordArenaActivity extends AppCompatActivity {
         String response=word+" is not a valid word. Try again!";
         if(dictionary.contains(word)){
             response="You have discovered a new word!\n"+word;
+//            checkChallenges();
             int scoreToAdd=calculateScore(word);
             int newScore=score+scoreToAdd;
-            scoreDb.setValue(newScore);
+            challengeManager.newWord(word);
+            scoreDb.child("score").setValue(newScore);
+           // scoreDb.setValue(new ScoreItem(user.getEmail(),newScore));
             updateCounts(word);
-
 
         }
         textView.setTextSize(24);
