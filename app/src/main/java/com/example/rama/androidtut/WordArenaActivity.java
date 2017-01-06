@@ -1,7 +1,6 @@
 package com.example.rama.androidtut;
 
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
@@ -34,7 +33,6 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-import java.io.File;
 import java.io.InputStream;
 import java.util.HashSet;
 import java.util.Scanner;
@@ -45,20 +43,14 @@ public class WordArenaActivity extends AppCompatActivity {
 
     static String TAG = "WordArenaActivity";
     private int score;
-    GridView grid;
+
 
     SharedPreferences sharedPref;
     //text views for each letter in the answer
     private TextView[] charViews;
-    //letter button grid
-    private GridView letters;
     //letter button adapter
     private Button submitButton;
     private LetterAdapter ltrAdapt;
-    private DatabaseReference database;
-    private FirebaseAuth firebaseAuth;
-    private FirebaseUser user;
-    private DatabaseReference gamePlayDb;
     private DatabaseReference[] letterRefs;
     private int[] letterCounts;
     private DatabaseReference scoreDb;
@@ -85,7 +77,7 @@ public class WordArenaActivity extends AppCompatActivity {
         LinearLayout wordLayout = (LinearLayout) findViewById(R.id.word);
 
         //get letter button grid
-        letters = (GridView)findViewById(R.id.letters);
+        GridView letters = (GridView) findViewById(R.id.letters);
 
         ltrAdapt=new LetterAdapter(this);
         letters.setAdapter(ltrAdapt);
@@ -102,11 +94,11 @@ public class WordArenaActivity extends AppCompatActivity {
             wordLayout.addView(charViews[c]);
 
         }
-        database = FirebaseDatabase.getInstance().getReference();
-        firebaseAuth= FirebaseAuth.getInstance();
-        user = firebaseAuth.getCurrentUser();
+        DatabaseReference database = FirebaseDatabase.getInstance().getReference();
+        FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
+        FirebaseUser user = firebaseAuth.getCurrentUser();
         loadDictionary();
-        scoreDb=database.child("Scores").child(user.getUid()).getRef();
+        scoreDb= database.child("Scores").child(user.getUid()).getRef();
         scoreDb.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -120,14 +112,14 @@ public class WordArenaActivity extends AppCompatActivity {
             }
         });
 
-        gamePlayDb=database.child("GamePlay").child(user.getUid());
+        DatabaseReference gamePlayDb = database.child("GamePlay").child(user.getUid());
         letterCounts=new int[26];
         temporaryCount=new int[26];
         letterRefs=new DatabaseReference[26];
         for(int i=0;i<26;i++){
             final int j=i;
             String letter = (char) (i + 'A') + "";
-            letterRefs[i]=gamePlayDb.child("Letters").child(letter).getRef();
+            letterRefs[i]= gamePlayDb.child("Letters").child(letter).getRef();
 
             letterRefs[i].addValueEventListener(new ValueEventListener() {
                 @Override
@@ -176,7 +168,7 @@ public class WordArenaActivity extends AppCompatActivity {
         char letterChar = ltr.charAt(0);
        // view.setBackgroundResource(R.drawable.letter_down);
         if(chosen<7) {
-            charViews[chosen].setText(letterChar+"");
+            charViews[chosen].setText(String.valueOf(letterChar));
             charViews[chosen].setTextColor(Color.BLACK);
             chosen++;
         }
@@ -269,7 +261,7 @@ public class WordArenaActivity extends AppCompatActivity {
 //            checkChallenges();
             int scoreToAdd=calculateScore(word);
             int newScore=score+scoreToAdd;
-            challengeManager.newWord(word,this,scoreToAdd);
+            challengeManager.checkWord(word,this,scoreToAdd);
             challengeManager.checkScore(newScore,this);
             scoreDb.child("score").setValue(newScore);
            // scoreDb.setValue(new ScoreItem(user.getEmail(),newScore));

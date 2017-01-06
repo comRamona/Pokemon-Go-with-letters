@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Created by Ramona on 29/12/2016.
+ * This class maps all Grabble letters to their in game value.
  */
 
 public class LetterValues {

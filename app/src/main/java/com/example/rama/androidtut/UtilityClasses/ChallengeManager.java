@@ -1,11 +1,9 @@
 package com.example.rama.androidtut.UtilityClasses;
 
-import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.util.Log;
 
-import com.example.rama.androidtut.WordArenaActivity;
+
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -14,44 +12,37 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-import java.sql.SQLOutput;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
-import java.util.Map;
+
 
 /**
- * Created by Ramona on 04/01/2017.
+ * ChallengeManager gets alerted each time a new word is created or a new letter is collected,
+ * checking and updating the challenge database and awarding bonus hints.
  */
 
 public class ChallengeManager {
     private static ChallengeManager challengeManager=new ChallengeManager();
     private DatabaseReference challengeDb;
     private DatabaseReference statisticsDb;
-    private DatabaseReference database;
-    private FirebaseAuth firebaseAuth;
     private FirebaseUser user;
     private DatabaseReference allWords;
     private int numberOfWords;
     private int numberOfHints;
     private int numberOfLetters;
     private boolean[] startLetters;
-    private DatabaseReference[] startRefs;
     private HashMap<String,Challenge> allChallenges=new HashMap<>();
     private String TAG="ChallengeManager";
 
     private ChallengeManager(){
-        database = FirebaseDatabase.getInstance().getReference();
-        firebaseAuth= FirebaseAuth.getInstance();
+        DatabaseReference database = FirebaseDatabase.getInstance().getReference();
+        FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
         user = firebaseAuth.getCurrentUser();
-        challengeDb=database.child("Challenges").child(user.getUid()).getRef();
-        statisticsDb=database.child("Statistics").child(user.getUid()).getRef();
+        challengeDb= database.child("Challenges").child(user.getUid()).getRef();
+        statisticsDb= database.child("Statistics").child(user.getUid()).getRef();
         allWords=statisticsDb.child("AllWords").getRef();
 
         startLetters=new boolean[26];
-        startRefs=new DatabaseReference[26];
+        DatabaseReference[] startRefs = new DatabaseReference[26];
         for(int i=0;i<26;i++) {
             final int j = i;
             String letter = (char) (i + 'A') + "";
@@ -125,10 +116,10 @@ public class ChallengeManager {
     public int getNumberOfHints(){
         return numberOfHints;
     }
-    public void changeNumberOfHints(int i){
+    private void changeNumberOfHints(int i){
         statisticsDb.child("NumberOfHints").getRef().setValue(numberOfHints+i);
     }
-    public void newWord(String word,Context context,int scoreToAdd){
+    public void checkWord(String word, Context context, int scoreToAdd){
         int newTotal=numberOfWords+1;
         BonusHint returnHint=new BonusHint("default",0);
         android.support.v7.app.AlertDialog alertDialog=getAlertDialog(context);
@@ -157,10 +148,10 @@ public class ChallengeManager {
         allWords.child(word).getRef().setValue(scoreToAdd);
         statisticsDb.child("NumberOfWords").getRef().setValue(numberOfWords+1);
 
-        if(allChallenges.get("eachletterword").isCompleted()==false){
+        if(!allChallenges.get("eachletterword").isCompleted()){
             boolean allLetters=true;
             for(int i=0;i<26;i++)
-                if(startLetters[i]==false){
+                if(!startLetters[i]){
                     allLetters=false;
                     break;
                 }
@@ -177,7 +168,7 @@ public class ChallengeManager {
     }
 
     public void consecdays(Context context){
-        if(allChallenges.get("consecdays").isCompleted()==false){
+        if(!allChallenges.get("consecdays").isCompleted()){
             challengeDb.child("consecdays").child("completed").getRef().setValue(true);
             android.support.v7.app.AlertDialog alertDialog = getAlertDialog(context);
             alertDialog.setMessage("You have played the game on consecutive days! \n" +
@@ -196,8 +187,8 @@ public class ChallengeManager {
         for(Integer i:counts){
             if(i<5) { fiveEach=false; break ;}
         }
-        if(oneEach==true){
-            if(allChallenges.get("1eachletter").isCompleted()==false) {
+        if(oneEach){
+            if(!allChallenges.get("1eachletter").isCompleted()) {
                 challengeDb.child("1eachletter").child("completed").getRef();
                 android.support.v7.app.AlertDialog alertDialog = getAlertDialog(context);
                 alertDialog.setMessage("You have collected 1 of each letter! \n" +
@@ -206,8 +197,8 @@ public class ChallengeManager {
                 changeNumberOfHints(1);
             }
         }
-        if(fiveEach==true){
-            if(allChallenges.get("5eachletter").isCompleted()==false) {
+        if(fiveEach){
+            if(!allChallenges.get("5eachletter").isCompleted()) {
                 challengeDb.child("5eachletter").child("completed").getRef();
                 android.support.v7.app.AlertDialog alertDialog = getAlertDialog(context);
                 alertDialog.setMessage("You have collected 5 of each letter! \n" +
@@ -218,7 +209,7 @@ public class ChallengeManager {
         }
     }
 
-    public void newLetter(Context context){
+    public void checkLetter(Context context){
       if(numberOfLetters+1==100){
           System.out.println("should be 100");
           android.support.v7.app.AlertDialog alertDialog = getAlertDialog(context);
@@ -234,7 +225,7 @@ public class ChallengeManager {
     }
 
     public void checkScore(int score, Context context){
-        if(allChallenges.get("score2000").isCompleted()==false&&score>=2000){
+        if(!allChallenges.get("score2000").isCompleted()&&score>=2000){
             challengeDb.child("score2000").child("completed").getRef().setValue(true);
             android.support.v7.app.AlertDialog alertDialog = getAlertDialog(context);
             alertDialog.setMessage("You have achieved a score of 2000! Here is a bonus hint " +
@@ -247,7 +238,7 @@ public class ChallengeManager {
     }
 
 
-public android.support.v7.app.AlertDialog getAlertDialog(Context context) {
+private android.support.v7.app.AlertDialog getAlertDialog(Context context) {
     android.support.v7.app.AlertDialog alertDialog = new android.support.v7.app.AlertDialog.Builder(context).create();
 
     alertDialog.setButton(android.support.v7.app.AlertDialog.BUTTON_NEUTRAL, "OK",

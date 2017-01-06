@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
-import android.content.SharedPreferences;
 import android.graphics.drawable.ColorDrawable;
 import android.location.Location;
 import android.net.ConnectivityManager;
@@ -54,13 +53,9 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.google.maps.android.kml.KmlLayer;
-import com.google.maps.android.kml.KmlPlacemark;
 
 import org.xmlpull.v1.XmlPullParserException;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -198,6 +193,7 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
 
                 }catch(Exception e){
 
+                    Log.e(TAG,e.getMessage());
                 }
 
             }
@@ -376,7 +372,7 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
                 this
         ).setResultCallback(new ResultCallback<Status>() {
             @Override
-            public void onResult(Status status) {
+            public void onResult(@NonNull Status status) {
             }
         });
 
@@ -432,7 +428,7 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
 
     /**
      * A new letter was collected and it will be added to the user's inventory
-     * @param marker
+     * @param marker Marker the user clicked on
      */
     @Override
     public void onInfoWindowClick(Marker marker) {
@@ -452,7 +448,7 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
            marker.remove();
            markersDb.child(key).removeValue();
            String title = marker.getTitle();
-           challengeManager.newLetter(getApplicationContext());
+           challengeManager.checkLetter(getApplicationContext());
            int i = title.charAt(0) - 'A';
            int oldVal = letterCounts[i];
            letterRefs[i].setValue(oldVal + 1).addOnCompleteListener(new OnCompleteListener<Void>() {
@@ -535,7 +531,7 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
 
 
     @Override
-    public void onConnectionFailed(ConnectionResult result) {
+    public void onConnectionFailed(@NonNull ConnectionResult result) {
         // Refer to the javadoc for ConnectionResult to see what error codes might be returned in
         // onConnectionFailed.
         Log.i(TAG, "Connection failed: ConnectionResult.getErrorCode() = " + result.getErrorCode());
@@ -556,8 +552,6 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
 
         //Place current location marker
         LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
-        MarkerOptions markerOptions = new MarkerOptions();
-
 
         //move map camera
         mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
@@ -580,7 +574,7 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
      * settings dialog to the user.
      */
     @Override
-    public void onResult(LocationSettingsResult locationSettingsResult) {
+    public void onResult(@NonNull LocationSettingsResult locationSettingsResult) {
         final Status status = locationSettingsResult.getStatus();
         switch (status.getStatusCode()) {
             case LocationSettingsStatusCodes.SUCCESS:
@@ -642,7 +636,7 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
                 this
         ).setResultCallback(new ResultCallback<Status>() {
             @Override
-            public void onResult(Status status) {
+            public void onResult(@NonNull Status status) {
             }
         });
 
@@ -751,74 +745,6 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
         super.onSaveInstanceState(savedInstanceState);
         Log.i(TAG, "Saving the state");
         savedInstanceState.putParcelable(LOCATION_KEY, mCurrentLocation);
-
-    }
-
-    private class DownloadLettersTask extends AsyncTask<String, Void, byte[]> {
-
-
-        @Override
-        protected byte[] doInBackground(String... params) {
-            try {
-                InputStream is = downloadUrl(params[0]);
-
-
-                ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-                int nRead;
-                byte[] data = new byte[16384];
-                while ((nRead = is.read(data, 0, data.length)) != -1) {
-                    buffer.write(data, 0, nRead);
-                }
-                buffer.flush();
-                return buffer.toByteArray();
-            } catch (IOException e) {
-                Log.i(TAG, e.getMessage());
-            }
-            return null;
-        }
-
-
-        protected void onPostExecute(byte[] byteArr) {
-            try {
-                KmlLayer kmlLayer = new KmlLayer(mMap, new ByteArrayInputStream(byteArr),
-                        getApplicationContext());
-                kmlLayer.addLayerToMap();
-                Iterable<KmlPlacemark> placemarks = kmlLayer.getPlacemarks();
-                //delete all previous markers
-
-
-                for (KmlPlacemark kp : placemarks) {
-                    // System.out.println(kp.getProperties());
-
-
-                    // System.out.println(kp.toString());
-
-                }
-
-                // moveCameraToKml(kmlLayer);
-            } catch (XmlPullParserException e) {
-                Log.i(TAG, e.getMessage());
-            } catch (IOException e) {
-                Log.i(TAG, e.getMessage());
-            }
-        }
-
-
-        // Given a string representation of a URL, sets up a connection and gets
-// an input stream.
-        private InputStream downloadUrl(String urlString) throws IOException {
-            URL url = new URL(urlString);
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setReadTimeout(10000 /* milliseconds */);
-            conn.setConnectTimeout(15000 /* milliseconds */);
-            conn.setRequestMethod("GET");
-            conn.setDoInput(true);
-            // Starts the query
-            conn.connect();
-            Log.i(TAG, "connected succesfully");
-            return conn.getInputStream();
-        }
-
 
     }
 
