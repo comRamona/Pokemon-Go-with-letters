@@ -289,6 +289,8 @@ public class MainActivity extends BaseActivity implements
         for (int i = 0; i < 26; i++) {
             String letter = (char) (i + 'A') + "";
             gamePlayDb.child("Letters").child(letter).setValue(0);
+            database.child("Statistics").child(user.getUid()).child("StartLetters").
+                    child(letter).setValue(false);
 
         }
             gamePlayDb.child("lastDownload").setValue("");
@@ -297,16 +299,18 @@ public class MainActivity extends BaseActivity implements
 //        database.child("Scores").child(user.getUid()).child("email").setValue(user.getEmail());
 //            database.child("Scores").child(user.getUid()).child("score").setValue(0);
             DatabaseReference challengesDb=database.child("Challenges").child(user.getUid());
-            database.child("Statistics").child(user.getUid()).child("TotalWords").setValue(0);
-            Challenge a=new Challenge("play2days");
-            Challenge b=new Challenge("100letters");
-            Challenge c=new Challenge("5each");
-            Challenge d=new Challenge("eachletterword");
-            Challenge e=new Challenge("score2000");
-            challengesDb.child("play2days").setValue(a);
-            challengesDb.child("100letters").setValue(b);
-            challengesDb.child("5each").setValue(c);
-            challengesDb.child("eachletterword").setValue(d);
-            challengesDb.child("score2000").setValue(e);
+            database.child("Statistics").child(user.getUid()).child("NumberOfWords").setValue(0);
+            database.child("Statistics").child(user.getUid()).child("NumberOfHints").setValue(0);
+            database.child("Statistics").child(user.getUid()).child("NumberOfLetters").setValue(0);
+
+            challengesDb.child("consecdays").setValue(new Challenge("Play the game on consecutive days"));
+            challengesDb.child("100letters").setValue(new Challenge("Collect 100 letters"));
+            challengesDb.child("1words").setValue(new Challenge("Discover one word"));
+            challengesDb.child("5words").setValue(new Challenge("Discover 5 words"));
+            challengesDb.child("1eachletter").setValue(new Challenge("Collect at least one of each letter"));
+            challengesDb.child("5eachletter").setValue(new Challenge("Collect at least 5 of each letter"));
+            challengesDb.child("eachletterword").setValue(new Challenge("Discover a word starting witch each letter"));
+            challengesDb.child("score2000").setValue(new Challenge("Score 2000 points"));
+
     }
 }

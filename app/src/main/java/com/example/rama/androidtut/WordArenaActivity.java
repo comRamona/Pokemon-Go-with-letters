@@ -145,7 +145,7 @@ public class WordArenaActivity extends AppCompatActivity {
             });}
         Log.i(TAG,dictionary.size()+"");
 
-        challengeManager=ChallengeManager.getInstance(this);
+        challengeManager=ChallengeManager.getInstance();
     }
 
 
@@ -170,7 +170,7 @@ public class WordArenaActivity extends AppCompatActivity {
 
         //can only press letter if more than 0 count
         if(temporaryCount[ltr.charAt(0)-'A']<=0) return;
-        String newText=ltr.charAt(0)+":"+(letterCounts[ltr.charAt(0)-'A']-1);
+        String newText=ltr.charAt(0)+":"+(temporaryCount[ltr.charAt(0)-'A']-1);
         temporaryCount[ltr.charAt(0)-'A']--;
         ((TextView)view).setText(newText);
         char letterChar = ltr.charAt(0);
@@ -240,6 +240,9 @@ public class WordArenaActivity extends AppCompatActivity {
         ltrAdapt.reset(letterCounts);
         for(int i=0;i<7;i++)
             charViews[i].setText("");
+        chosen=0;
+        for(int i=0;i<26;i++)
+            temporaryCount[i]=letterCounts[i];
     }
 
     public void checkWord(View view) {
@@ -266,7 +269,8 @@ public class WordArenaActivity extends AppCompatActivity {
 //            checkChallenges();
             int scoreToAdd=calculateScore(word);
             int newScore=score+scoreToAdd;
-            challengeManager.newWord(word);
+            challengeManager.newWord(word,this,scoreToAdd);
+            challengeManager.checkScore(newScore,this);
             scoreDb.child("score").setValue(newScore);
            // scoreDb.setValue(new ScoreItem(user.getEmail(),newScore));
             updateCounts(word);
@@ -274,7 +278,7 @@ public class WordArenaActivity extends AppCompatActivity {
         }
         textView.setTextSize(24);
         textView.setText(response);
-
+        refreshScreen(view);
 
     }
 
@@ -296,7 +300,7 @@ public class WordArenaActivity extends AppCompatActivity {
         for(int i=0;i<word.length();i++){
             int pos=word.charAt(i)-'A';
             int t=temporaryCount[pos];
-            letterRefs[pos].setValue(t-1);
+            letterRefs[pos].setValue(t);
         }
     }
 }

@@ -12,6 +12,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.FragmentActivity;
@@ -24,6 +25,7 @@ import android.view.ViewGroup;
 import android.widget.PopupWindow;
 import android.widget.Toast;
 
+import com.example.rama.androidtut.UtilityClasses.ChallengeManager;
 import com.example.rama.androidtut.UtilityClasses.KxmlParser;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -43,6 +45,8 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -110,6 +114,7 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
     private DatabaseReference[] letterRefs;
     private DatabaseReference lastUpdatedRef;
     private FirebaseUser user;
+    private ChallengeManager challengeManager;
 
 
 
@@ -141,7 +146,7 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
         Calendar c = Calendar.getInstance();
         System.out.println("Current time => " + c.getTime());
 
-        SimpleDateFormat df = new SimpleDateFormat("dd-MMM-yyyy");
+        final SimpleDateFormat df = new SimpleDateFormat("dd-MMM-yyyy");
 
         currentDay = df.format(c.getTime());
 
@@ -162,7 +167,6 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
             final int j=i;
             String letter = (char) (i + 'A') + "";
             letterRefs[i]=gamePlayDb.child("Letters").child(letter).getRef();
-
             letterRefs[i].addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
@@ -181,6 +185,21 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 lastDownload=dataSnapshot.getValue(String.class);
+                Calendar c = Calendar.getInstance();
+
+                try {
+                    Date startDate=df.parse(lastDownload);
+                    Date endDate=df.parse(currentDay);
+                    c.setTime(endDate);
+                    c.add(Calendar.DATE, -1);
+                    if (c.getTime().equals(startDate)){
+                        challengeManager.consecdays(getApplicationContext());
+                    }
+
+                }catch(Exception e){
+
+                }
+
             }
 
             @Override
@@ -188,6 +207,7 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
 
             }
         });
+        challengeManager=ChallengeManager.getInstance();
 
 
     }
@@ -203,7 +223,7 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
 
             //Get user map
             Map singleUser = (Map) entry.getValue();
-            //Get phone field and append to list
+
             LatLng latLng=new LatLng((double)singleUser.get("lat"),(double)singleUser.get("lng"));
             mMap.addMarker(new MarkerOptions().position(latLng).title((String) singleUser.get("name")).snippet("reloaded"));
 
@@ -292,9 +312,7 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
                 mCurrentLocation = savedInstanceState.getParcelable(LOCATION_KEY);
             }
 
-            if (savedInstanceState.keySet().contains("lastDownloaded")) {
-                lastDownload = savedInstanceState.getString("lastDownloaded");
-            }
+
 
         }
     }
@@ -427,17 +445,22 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
         Location.distanceBetween(lastLocation.getLatitude(), lastLocation.getLongitude(),
                 position.latitude, position.longitude, results);
         Log.i(TAG,"Distance from marker is "+results[0]);
-       if(results[0]<=15) {
-           //replace ! with . since databse doesnt allow certain characters in keys
+       if(results[0]<=20) {
+           //replace ! with . since database doesn't allow certain characters in keys
            showDialog("Congratulations!","You have collected letter "+marker.getTitle()+"!");
            String key = (marker.getPosition().latitude + "!" + marker.getPosition().longitude).replaceAll("\\.", ",");
            marker.remove();
            markersDb.child(key).removeValue();
-
            String title = marker.getTitle();
+           challengeManager.newLetter(getApplicationContext());
            int i = title.charAt(0) - 'A';
            int oldVal = letterCounts[i];
-           letterRefs[i].setValue(oldVal + 1);
+           letterRefs[i].setValue(oldVal + 1).addOnCompleteListener(new OnCompleteListener<Void>() {
+               @Override
+               public void onComplete(@NonNull Task<Void> task) {
+                   challengeManager.checkCounts(letterCounts,getApplicationContext());
+               }
+           });
        }
         else {
            showDialog("Try again","Sorry, you are too far away from this letter!");
@@ -728,7 +751,6 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
         super.onSaveInstanceState(savedInstanceState);
         Log.i(TAG, "Saving the state");
         savedInstanceState.putParcelable(LOCATION_KEY, mCurrentLocation);
-        savedInstanceState.putString("lastDownloaded", lastDownload);
 
     }
 
@@ -867,7 +889,7 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
         // Given a string representation of a URL, sets up a connection and gets
 // an input stream.
         private InputStream downloadUrl(String urlString) throws IOException {
-            System.out.println("URL:"+urlString);
+
             URL url = new URL(urlString);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setReadTimeout(10000 /* milliseconds */);
