@@ -448,7 +448,7 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
            marker.remove();
            markersDb.child(key).removeValue();
            String title = marker.getTitle();
-           challengeManager.checkLetter(getApplicationContext());
+           challengeManager.checkLetter(this);
            int i = title.charAt(0) - 'A';
            int oldVal = letterCounts[i];
            letterRefs[i].setValue(oldVal + 1).addOnCompleteListener(new OnCompleteListener<Void>() {

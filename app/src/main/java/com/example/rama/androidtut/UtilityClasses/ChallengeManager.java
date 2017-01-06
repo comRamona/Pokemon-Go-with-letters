@@ -215,6 +215,8 @@ public class ChallengeManager {
           android.support.v7.app.AlertDialog alertDialog = getAlertDialog(context);
           alertDialog.setMessage("You have collected 100 letters! \n" +
                   "Here is a bonus hint for you!");
+          alertDialog.show();
+          changeNumberOfHints(1);
           challengeDb.child("100letters").child("completed").getRef().setValue(true);
       }
 
@@ -231,6 +233,7 @@ public class ChallengeManager {
             alertDialog.setMessage("You have achieved a score of 2000! Here is a bonus hint " +
                     "for you");
             alertDialog.show();
+            changeNumberOfHints(1);
         }
     }
     public static ChallengeManager getInstance(){
