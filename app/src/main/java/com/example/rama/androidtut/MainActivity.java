@@ -12,14 +12,13 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.rama.androidtut.UtilityClasses.Challenge;
-import com.example.rama.androidtut.UtilityClasses.ScoreItem;
+import com.example.rama.androidtut.UtilityClasses.ListItem;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
@@ -294,8 +293,8 @@ public class MainActivity extends BaseActivity implements
 
         }
             gamePlayDb.child("lastDownload").setValue("");
-            ScoreItem scoreItem=new ScoreItem(user.getEmail(),0);
-            database.child("Scores").child(user.getUid()).setValue(scoreItem);
+            ListItem listItem =new ListItem(user.getEmail(),0);
+            database.child("Scores").child(user.getUid()).setValue(listItem);
 //        database.child("Scores").child(user.getUid()).child("email").setValue(user.getEmail());
 //            database.child("Scores").child(user.getUid()).child("score").setValue(0);
             DatabaseReference challengesDb=database.child("Challenges").child(user.getUid());

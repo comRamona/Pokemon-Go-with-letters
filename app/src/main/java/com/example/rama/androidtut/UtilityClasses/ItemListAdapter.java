@@ -16,15 +16,15 @@ package com.example.rama.androidtut.UtilityClasses;
 
         import java.util.List;
 
-public class LeaderboardListAdapter extends BaseAdapter {
+public class ItemListAdapter extends BaseAdapter {
 
     private  Context mContext;
     private LayoutInflater inflater;
-    private List<ScoreItem> itemsItems;
+    private List<ListItem> itemsItems;
 
 
 
-    public LeaderboardListAdapter(Context context, List<ScoreItem> itemsItems) {
+    public ItemListAdapter(Context context, List<ListItem> itemsItems) {
         this.mContext = context;
         this.itemsItems = itemsItems;
 
@@ -64,7 +64,7 @@ public class LeaderboardListAdapter extends BaseAdapter {
             holder = (ViewHolder) scoreView.getTag();
         }
 
-        final ScoreItem m = itemsItems.get(position);
+        final ListItem m = itemsItems.get(position);
         holder.name.setText(m.getName());
         holder.score.setText(String.valueOf(m.getScore()));
 

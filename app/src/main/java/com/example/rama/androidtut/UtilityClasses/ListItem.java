@@ -5,15 +5,15 @@ package com.example.rama.androidtut.UtilityClasses;
  */
 
 
-public class ScoreItem {
+public class ListItem {
 
     private String name;
     private int score;
 
-    public ScoreItem() {
+    public ListItem() {
     }
 
-    public ScoreItem(String name, int score) {
+    public ListItem(String name, int score) {
 
         this.name = name;
         this.score = score;

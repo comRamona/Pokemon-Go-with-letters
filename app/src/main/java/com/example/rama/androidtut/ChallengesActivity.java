@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.ListView;
 
+import com.example.rama.androidtut.UtilityClasses.Challenge;
 import com.example.rama.androidtut.UtilityClasses.ItemListAdapter;
 import com.example.rama.androidtut.UtilityClasses.ListItem;
 import com.google.firebase.auth.FirebaseAuth;
@@ -26,9 +27,9 @@ import java.util.List;
  * http://stackoverflow.com/questions/34518421/adding-a-scoreboard-to-an-android-studio-application
  */
 
-public class LeaderboardActivity extends AppCompatActivity {
+public class ChallengesActivity extends AppCompatActivity {
 
-    static String TAG = "LeaderboardActivity";
+    static String TAG = "StatisticsActivity";
     private List<ListItem> listItemList = new ArrayList<>();
     private ListView listView;
     private ItemListAdapter adapter;
@@ -50,8 +51,8 @@ public class LeaderboardActivity extends AppCompatActivity {
         database = FirebaseDatabase.getInstance().getReference();
         firebaseAuth= FirebaseAuth.getInstance();
         user = firebaseAuth.getCurrentUser();
-        scoreDb=database.child("Scores").getRef();
-        queryRef = scoreDb.orderByChild("score").limitToLast(10);
+        scoreDb=database.child("Challenges").child(user.getUid()).getRef();
+        queryRef = scoreDb.orderByChild("completed").limitToLast(100);
 
         queryRef.addValueEventListener(valueEventListener=new ValueEventListener() {
             @Override
@@ -63,7 +64,9 @@ public class LeaderboardActivity extends AppCompatActivity {
 
                     //System.out.println(postSnapshot.getKey()+" hdfhdj "+postSnapshot.getValue());
                     Log.i(TAG,postSnapshot.getValue().toString());
-                    ListItem listItem =postSnapshot.getValue(ListItem.class);
+                    Challenge challenge =postSnapshot.getValue(Challenge.class);
+                    int completed=challenge.isCompleted() == true? 1 : 0;
+                    ListItem listItem=new ListItem(challenge.getDescription(),completed);
                     listItemList.add(listItem);
 
                 }

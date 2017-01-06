@@ -26,9 +26,9 @@ import java.util.List;
  * http://stackoverflow.com/questions/34518421/adding-a-scoreboard-to-an-android-studio-application
  */
 
-public class LeaderboardActivity extends AppCompatActivity {
+public class StatisticsActivity extends AppCompatActivity {
 
-    static String TAG = "LeaderboardActivity";
+    static String TAG = "StatisticsActivity";
     private List<ListItem> listItemList = new ArrayList<>();
     private ListView listView;
     private ItemListAdapter adapter;
@@ -50,8 +50,8 @@ public class LeaderboardActivity extends AppCompatActivity {
         database = FirebaseDatabase.getInstance().getReference();
         firebaseAuth= FirebaseAuth.getInstance();
         user = firebaseAuth.getCurrentUser();
-        scoreDb=database.child("Scores").getRef();
-        queryRef = scoreDb.orderByChild("score").limitToLast(10);
+        scoreDb=database.child("Statistics").child(user.getUid()).child("AllWords").getRef();
+        queryRef = scoreDb.orderByChild("score").limitToLast(100);
 
         queryRef.addValueEventListener(valueEventListener=new ValueEventListener() {
             @Override
@@ -63,7 +63,7 @@ public class LeaderboardActivity extends AppCompatActivity {
 
                     //System.out.println(postSnapshot.getKey()+" hdfhdj "+postSnapshot.getValue());
                     Log.i(TAG,postSnapshot.getValue().toString());
-                    ListItem listItem =postSnapshot.getValue(ListItem.class);
+                    ListItem listItem =new ListItem(postSnapshot.getKey(),postSnapshot.getValue(Integer.class));
                     listItemList.add(listItem);
 
                 }

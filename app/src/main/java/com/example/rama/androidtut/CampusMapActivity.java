@@ -257,6 +257,7 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
                 @Override
                 public void onClick(View v) {
                     Intent intent = new Intent(getApplicationContext(), WordArenaActivity.class);
+                    pwindo.dismiss();
                     startActivity(intent);
                 }
             });
@@ -266,7 +267,9 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
                 @Override
                 public void onClick(View v) {
                     Intent intent = new Intent(getApplicationContext(), LeaderboardActivity.class);
+                    pwindo.dismiss();
                     startActivity(intent);
+
                 }
             });
 
@@ -274,7 +277,12 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
             fab_stats.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+
+                    Intent intent = new Intent(getApplicationContext(),  StatisticsActivity.class);
                     pwindo.dismiss();
+                    startActivity(intent);
+
+
                 }
             });
 
@@ -282,7 +290,9 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
             fab_usr.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    Intent intent = new Intent(getApplicationContext(), ChallengesActivity.class);
                     pwindo.dismiss();
+                    startActivity(intent);
                 }
             });
 

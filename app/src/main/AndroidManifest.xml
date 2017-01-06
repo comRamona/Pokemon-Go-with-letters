@@ -64,6 +64,8 @@
             android:name=".LoginActivity"
             android:label="@string/title_activity_login" />
         <activity android:name=".LeaderboardActivity" android:label="Leaderboard"></activity>
+        <activity android:name=".StatisticsActivity" android:label="Statistics"></activity>
+        <activity android:name=".ChallengesActivity" android:label="Challenges"></activity>
     </application>
 
 </manifest>

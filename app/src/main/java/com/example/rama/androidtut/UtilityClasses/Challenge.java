@@ -1,7 +1,7 @@
 package com.example.rama.androidtut.UtilityClasses;
 
 /**
- * Created by Ramona on 04/01/2017.
+ * Challenges to be stored in the database, containing a description and complete status
  */
 
 public class Challenge {

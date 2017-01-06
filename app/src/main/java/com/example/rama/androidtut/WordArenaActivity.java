@@ -24,7 +24,7 @@ import android.widget.LinearLayout;
 import com.example.rama.androidtut.UtilityClasses.ChallengeManager;
 import com.example.rama.androidtut.UtilityClasses.LetterAdapter;
 import com.example.rama.androidtut.UtilityClasses.LetterValues;
-import com.example.rama.androidtut.UtilityClasses.ScoreItem;
+import com.example.rama.androidtut.UtilityClasses.ListItem;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -102,7 +102,7 @@ public class WordArenaActivity extends AppCompatActivity {
         scoreDb.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                score=dataSnapshot.getValue(ScoreItem.class).getScore();
+                score=dataSnapshot.getValue(ListItem.class).getScore();
             }
 
             @Override
@@ -264,7 +264,7 @@ public class WordArenaActivity extends AppCompatActivity {
             challengeManager.checkWord(word,this,scoreToAdd);
             challengeManager.checkScore(newScore,this);
             scoreDb.child("score").setValue(newScore);
-           // scoreDb.setValue(new ScoreItem(user.getEmail(),newScore));
+           // scoreDb.setValue(new ListItem(user.getEmail(),newScore));
             updateCounts(word);
 
         }
