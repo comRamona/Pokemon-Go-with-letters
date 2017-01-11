@@ -1,14 +1,16 @@
 package com.example.rama.androidtut;
 
 import android.app.Activity;
-import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -21,6 +23,7 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -44,6 +47,8 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -70,7 +75,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-public class CampusMapActivity extends FragmentActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener, ResultCallback<LocationSettingsResult>, GoogleMap.OnInfoWindowClickListener {
+public class CampusMapActivity extends FragmentActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener, ResultCallback<LocationSettingsResult>, GoogleMap.OnMarkerClickListener {
 
     /**
      * The desired interval for location updates. Inexact. Updates may be more or less frequent.
@@ -121,7 +126,6 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        installListener();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_campus_map);
 
@@ -146,8 +150,6 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
 
 
         Calendar c = Calendar.getInstance();
-        System.out.println("Current time => " + c.getTime());
-
 
 
         currentDay = df.format(c.getTime());
@@ -214,6 +216,7 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
 
         challengeManager=ChallengeManager.getInstance();
         onCreateDone=true;
+        installListener();
 
 
     }
@@ -222,8 +225,8 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
 
         if(mymarkers==null) {
 
-            Log.e(TAG,"No stored markers. Downloading");
-            loadThings(); return;
+            Log.i(TAG,"No stored markers. Downloading");
+            loadMarkersFromWebsite(); return;
         }
 
         for (Map.Entry<String, Object> entry : mymarkers.entrySet()){
@@ -231,8 +234,10 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
             //Get user map
             Map singleUser = (Map) entry.getValue();
 
+            String name="marker_green"+ singleUser.get("name");
+            int id = getResources().getIdentifier(name.toLowerCase(), "drawable", getPackageName());
             LatLng latLng=new LatLng((double)singleUser.get("lat"),(double)singleUser.get("lng"));
-            mMap.addMarker(new MarkerOptions().position(latLng).title((String) singleUser.get("name")).snippet("reloaded"));
+            mMap.addMarker(new MarkerOptions().position(latLng).title((String) singleUser.get("name")).icon(BitmapDescriptorFactory.fromResource(id)));
 
         }
 
@@ -425,7 +430,7 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
 
         mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
 
-        mMap.setOnInfoWindowClickListener(this);
+        mMap.setOnMarkerClickListener(this);
         //  mMap.animateCamera(CameraUpdateFactory.zoomTo(8));
 
 
@@ -435,22 +440,20 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
 
     public void downloadOrPopulateFromDatabase(){
         if (!currentDay.equals(lastDownload)) {
-            Log.e(TAG,"Before"+currentDay+" "+lastDownload);
             lastDownload = currentDay;
             lastUpdatedRef.setValue(lastDownload);
             String name=user.getUid();
-            Log.e(TAG,"Here is is"+currentDay+" "+lastDownload);
             //different day, remove previous stored markers and download new ones
             database.child("Markers").child(name).removeValue(new DatabaseReference.CompletionListener() {
                 @Override
                 public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
-                    loadThings();
+                    loadMarkersFromWebsite();
                 }
             });
         }
         else {
            Toast.makeText(getApplicationContext(),"Welcome back!",Toast.LENGTH_SHORT).show();
-            repopulate();
+            repopulateMarkersFromDatabase();
         }
 
     }
@@ -460,7 +463,7 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
      * @param marker Marker the user clicked on
      */
     @Override
-    public void onInfoWindowClick(Marker marker) {
+    public boolean onMarkerClick(Marker marker) {
 
 
         Location lastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
@@ -490,11 +493,12 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
         else {
            showDialog("Try again","Sorry, you are too far away from this letter!");
        }
+        return true;
 
     }
 
     // method to restore game markers, if they have been already downloaded for the day
-    public void repopulate() {
+    public void repopulateMarkersFromDatabase() {
         Log.e(TAG,"Repopulating from database");
         mMap.clear();
 
@@ -675,7 +679,7 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
 
     }
 
-    public void loadThings() {
+    public void loadMarkersFromWebsite() {
         if (!markers_loaded) {
             try {
 
@@ -689,7 +693,6 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
                    // full name form of the day
                     String day = new SimpleDateFormat("EEEE", Locale.ENGLISH).format(date.getTime());
                     String url = getResources().getString(R.string.lettersurl)+day.toLowerCase()+".kml";
-                    System.out.println(url);
                     // fetch data
                     new DownloadLetters().execute(url);
 
@@ -719,7 +722,7 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
         alertDialog.setPositiveButton("Retry", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
                 dialog.cancel();
-                if (!markers_loaded) loadThings();
+                if (!markers_loaded) loadMarkersFromWebsite();
             }
         });
 
@@ -781,6 +784,8 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
 
     }
 
+
+
     private class DownloadLetters extends AsyncTask<String, Void, List<KxmlParser.Placemark>> {
         @Override
         protected List<KxmlParser.Placemark> doInBackground(String... urls) {
@@ -795,20 +800,21 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
             }
         }
 
+
+
         @Override
         protected void onPostExecute(List<KxmlParser.Placemark> result) {
-
-            // Displays the HTML string in the UI via a WebView
-
-            //Show entries on map
-
-            // first, erase previous markers
 
             if (result != null) {
                 for (KxmlParser.Placemark e : result) {
 
-                    mMap.addMarker(new MarkerOptions().position(new LatLng(e.getLat(), e.getLng())).title(e.getDescription()).visible(true));
+
+                    String name="marker_green"+e.getDescription();
+                    int id = getResources().getIdentifier(name.toLowerCase(), "drawable", getPackageName());
+                    System.out.println(id);
+                    mMap.addMarker(new MarkerOptions().position(new LatLng(e.getLat(), e.getLng())).title(e.getDescription()).visible(true).icon(BitmapDescriptorFactory.fromResource(id)));
                     //save markers for latter use
+
 
                     DatabaseReference newMarker = markersDb.child(e.getAsKey());
                     newMarker.child("lat").setValue(e.getLat());
@@ -861,9 +867,17 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
         }
     }
 
+
     @Override
-    public void onBackPressed() {
-        moveTaskToBack(true);
+    public boolean onKeyDown(int keyCode, KeyEvent event)  {
+        if (keyCode == KeyEvent.KEYCODE_BACK ) {
+            // do something on back.
+            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+            startActivity(intent);
+            return true;
+        }
+
+        return super.onKeyDown(keyCode, event);
     }
 
     private void installListener() {
@@ -884,9 +898,9 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
 
                     if (state == NetworkInfo.State.CONNECTED) {
 
-                      if(!markers_loaded&&onCreateDone) {
-                          Log.e(TAG,"Broadcats thingy made me do it");
-                         // downloadOrPopulateFromDatabase();
+                      if(!markers_loaded) {
+                          Log.i(TAG,"Internet turned on. Loading markers.");
+                         //downloadOrPopulateFromDatabase();
 
                       }
 
