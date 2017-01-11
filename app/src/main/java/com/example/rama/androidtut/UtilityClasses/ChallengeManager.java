@@ -2,6 +2,8 @@ package com.example.rama.androidtut.UtilityClasses;
 
 import android.content.Context;
 import android.content.DialogInterface;
+import android.util.Log;
+import android.widget.Toast;
 
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -55,8 +57,7 @@ public class ChallengeManager {
 
                 @Override
                 public void onCancelled(DatabaseError databaseError) {
-
-                }
+                    Log.e(TAG,"Error updating db "+databaseError.getMessage());                }
             });
         }
 
@@ -72,6 +73,7 @@ public class ChallengeManager {
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
+               Log.e(TAG,"Error updating db "+databaseError.getMessage());
 
             }
         });
@@ -84,7 +86,7 @@ public class ChallengeManager {
 
           @Override
           public void onCancelled(DatabaseError databaseError) {
-
+              Log.e(TAG,"Error updating db "+databaseError.getMessage());
           }
       });
         statisticsDb.child("NumberOfHints").getRef().addValueEventListener(new ValueEventListener() {
@@ -95,7 +97,7 @@ public class ChallengeManager {
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-
+                Log.e(TAG,"Error updating db "+databaseError.getMessage());
             }
         });
 
@@ -107,7 +109,7 @@ public class ChallengeManager {
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-
+                Log.e(TAG,"Error updating db "+databaseError.getMessage());
             }
         });
 

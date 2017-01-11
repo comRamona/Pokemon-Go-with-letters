@@ -66,6 +66,15 @@
             android:text="Submit"
             android:onClick="checkWord"
             android:theme="@style/ThemeOverlay.MyDarkButton" />
+        <Button
+            android:id="@+id/hints"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Hints:"
+            android:onClick="giveHint"
+            android:theme="@style/ThemeOverlay.MyDarkButton" />
+
     </LinearLayout>
 
 

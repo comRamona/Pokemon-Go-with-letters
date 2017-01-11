@@ -1,8 +1,15 @@
 package com.example.rama.androidtut;
 
+import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.drawable.ColorDrawable;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
@@ -19,12 +26,14 @@ import android.graphics.Color;
 import android.view.Gravity;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
 
 import com.example.rama.androidtut.UtilityClasses.ChallengeManager;
 import com.example.rama.androidtut.UtilityClasses.LetterAdapter;
 import com.example.rama.androidtut.UtilityClasses.LetterValues;
 import com.example.rama.androidtut.UtilityClasses.ListItem;
+import com.example.rama.androidtut.UtilityClasses.Trie;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -34,9 +43,11 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.io.InputStream;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
-import java.util.Set;
 
 
 public class WordArenaActivity extends AppCompatActivity {
@@ -54,10 +65,14 @@ public class WordArenaActivity extends AppCompatActivity {
     private DatabaseReference[] letterRefs;
     private int[] letterCounts;
     private DatabaseReference scoreDb;
+    private DatabaseReference hintsDb;
     private PopupWindow pwindo;
-    private Set<String> dictionary;
     private int[] temporaryCount;
     private ChallengeManager challengeManager;
+    private int noHints;
+    private Trie dictionary;
+
+    private BroadcastReceiver broadcastReceiver;
     int chosen=0;
 
     @Override
@@ -112,6 +127,23 @@ public class WordArenaActivity extends AppCompatActivity {
             }
         });
 
+        final Button hintButton=(Button) findViewById(R.id.hints);
+        hintsDb=database.child("Statistics").child(user.getUid()).child("NumberOfHints").getRef();
+
+                hintsDb.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                noHints=dataSnapshot.getValue(Integer.class);
+                String s="Hints: "+noHints;
+                hintButton.setText(s);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
         DatabaseReference gamePlayDb = database.child("GamePlay").child(user.getUid());
         letterCounts=new int[26];
         temporaryCount=new int[26];
@@ -127,6 +159,7 @@ public class WordArenaActivity extends AppCompatActivity {
                     letterCounts[j]= dataSnapshot.getValue(Integer.class);
                     temporaryCount[j]=letterCounts[j];
                     ltrAdapt.updateCount(j,letterCounts[j]);
+                    ltrAdapt.notifyDataSetChanged();
 
                 }
 
@@ -135,14 +168,15 @@ public class WordArenaActivity extends AppCompatActivity {
                     Log.e(TAG,databaseError.getMessage());
                 }
             });}
-        Log.i(TAG,dictionary.size()+"");
 
         challengeManager=ChallengeManager.getInstance();
+        installListener();
+
     }
 
 
     private void loadDictionary(){
-        dictionary=new HashSet<>();
+        dictionary =new Trie();
         try {
             InputStream inputStream = getResources().openRawResource(R.raw.grabdict);
             Scanner scanner = new Scanner(inputStream);
@@ -258,13 +292,11 @@ public class WordArenaActivity extends AppCompatActivity {
         String response=word+" is not a valid word. Try again!";
         if(dictionary.contains(word)){
             response="You have discovered a new word!\n"+word;
-//            checkChallenges();
             int scoreToAdd=calculateScore(word);
             int newScore=score+scoreToAdd;
             challengeManager.checkWord(word,this,scoreToAdd);
             challengeManager.checkScore(newScore,this);
             scoreDb.child("score").setValue(newScore);
-           // scoreDb.setValue(new ListItem(user.getEmail(),newScore));
             updateCounts(word);
 
         }
@@ -293,6 +325,116 @@ public class WordArenaActivity extends AppCompatActivity {
             int pos=word.charAt(i)-'A';
             int t=temporaryCount[pos];
             letterRefs[pos].setValue(t);
+        }
+    }
+
+    public void giveHint(View view){
+
+        hintsDb.setValue(noHints-1);
+        String prefix=getCurrentWord();
+        String message="You need to input at least 3 letters to get a hint.";
+        if(prefix.length()>=3){
+            List<String> res= dictionary.getAllWordsStartingWith(prefix);
+            Log.w(TAG,prefix);
+            if(res==null||res.size()==0) message="No completion found.";
+            else {
+                String match=checkMatch(res);
+                if(match==null) message="No completion found. With a few more letters you could form "+res.get(0);
+                else message="How about "+match+"?";
+            }
+        }
+        android.support.v7.app.AlertDialog alertDialog=getAlertDialog(this);
+        alertDialog.setMessage(message);
+        alertDialog.setTitle("Hint");
+        alertDialog.show();
+    }
+
+    public String checkMatch(List<String> res){
+        Map<Character,Integer> counter=new HashMap<>();
+        for(String s:res){
+            counter.clear();
+            boolean found=true;
+            for(int i=0;i<26;i++){
+                counter.put(((char)(i+'A')),temporaryCount[i]);
+            }
+            for(int i=0;i<res.size();i++){
+                if(counter.get(s.charAt(i))>0){
+                    counter.put(s.charAt(i),counter.get(s.charAt(i))-1);
+                }
+                else found=false;
+            }
+            if(found) {
+                return s;
+            }
+        }
+        return null;
+    }
+
+    private android.support.v7.app.AlertDialog getAlertDialog(Context context) {
+        android.support.v7.app.AlertDialog alertDialog = new android.support.v7.app.AlertDialog.Builder(context).create();
+
+        alertDialog.setButton(android.support.v7.app.AlertDialog.BUTTON_NEUTRAL, "OK",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                });
+        alertDialog.setTitle(("Message"));
+        return alertDialog;
+    }
+    public ProgressDialog mProgressDialog;
+
+    public void showProgressDialog() {
+        if (mProgressDialog == null) {
+            mProgressDialog = new ProgressDialog(this);
+            mProgressDialog.setMessage(getString(R.string.loading));
+            mProgressDialog.setIndeterminate(true);
+        }
+
+        mProgressDialog.show();
+    }
+
+    public void hideProgressDialog() {
+        if (mProgressDialog != null && mProgressDialog.isShowing()) {
+            mProgressDialog.dismiss();
+        }
+    }
+
+    private void installListener() {
+
+        if (broadcastReceiver == null) {
+
+            broadcastReceiver = new BroadcastReceiver() {
+
+                @Override
+                public void onReceive(Context context, Intent intent) {
+
+                    Bundle extras = intent.getExtras();
+
+                    NetworkInfo info = (NetworkInfo) extras
+                            .getParcelable("networkInfo");
+
+                    NetworkInfo.State state = info.getState();
+
+                    if (state == NetworkInfo.State.CONNECTED) {
+
+
+
+
+                    } else {
+
+
+
+                            Toast.makeText(getApplicationContext(), "Internet connection is off. Turn it on to save your progress", Toast.LENGTH_LONG).show();
+
+                    }
+
+                }
+            };
+
+            final IntentFilter intentFilter = new IntentFilter();
+            intentFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
+            registerReceiver(broadcastReceiver, intentFilter);
         }
     }
 }

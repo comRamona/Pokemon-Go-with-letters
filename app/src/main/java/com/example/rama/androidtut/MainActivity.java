@@ -312,4 +312,5 @@ public class MainActivity extends BaseActivity implements
             challengesDb.child("score2000").setValue(new Challenge("Score 2000 points"));
 
     }
+
 }

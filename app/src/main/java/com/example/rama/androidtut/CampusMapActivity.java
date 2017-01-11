@@ -1,9 +1,12 @@
 package com.example.rama.androidtut;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.graphics.drawable.ColorDrawable;
 import android.location.Location;
@@ -110,11 +113,15 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
     private DatabaseReference lastUpdatedRef;
     private FirebaseUser user;
     private ChallengeManager challengeManager;
+    private BroadcastReceiver broadcastReceiver;
 
+    private boolean onCreateDone=false;
+    private final SimpleDateFormat df = new SimpleDateFormat("dd-MMM-yyyy");
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        installListener();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_campus_map);
 
@@ -141,7 +148,7 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
         Calendar c = Calendar.getInstance();
         System.out.println("Current time => " + c.getTime());
 
-        final SimpleDateFormat df = new SimpleDateFormat("dd-MMM-yyyy");
+
 
         currentDay = df.format(c.getTime());
 
@@ -153,9 +160,9 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
 
         user = mAuth.getCurrentUser();
 
-        markersDb = database.child("Markers").child(user.getUid());
+        markersDb = database.child("Markers").child(user.getUid()).getRef();
 
-        gamePlayDb=database.child("GamePlay").child(user.getUid());
+        gamePlayDb=database.child("GamePlay").child(user.getUid()).getRef();
         letterCounts=new int[26];
         letterRefs=new DatabaseReference[26];
         for(int i=0;i<26;i++){
@@ -170,7 +177,7 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
 
                 @Override
                 public void onCancelled(DatabaseError databaseError) {
-
+                    Log.e(TAG,"Error updating db "+databaseError.getMessage());
                 }
             });
         }
@@ -180,6 +187,7 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 lastDownload=dataSnapshot.getValue(String.class);
+                downloadOrPopulateFromDatabase();
                 Calendar c = Calendar.getInstance();
 
                 try {
@@ -200,10 +208,12 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-
+                Log.e(TAG,"Error updating db "+databaseError.getMessage());
             }
         });
+
         challengeManager=ChallengeManager.getInstance();
+        onCreateDone=true;
 
 
     }
@@ -211,10 +221,11 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
     private void collectOldMarkers(Map<String,Object> mymarkers) {
 
         if(mymarkers==null) {
-            System.out.println("My markers is null");
+
+            Log.e(TAG,"No stored markers. Downloading");
             loadThings(); return;
         }
-        System.out.println("Size is: "+mymarkers.size());
+
         for (Map.Entry<String, Object> entry : mymarkers.entrySet()){
 
             //Get user map
@@ -256,9 +267,11 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
             fab_new.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+
                     Intent intent = new Intent(getApplicationContext(), WordArenaActivity.class);
                     pwindo.dismiss();
                     startActivity(intent);
+
                 }
             });
 
@@ -415,10 +428,18 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
         mMap.setOnInfoWindowClickListener(this);
         //  mMap.animateCamera(CameraUpdateFactory.zoomTo(8));
 
+
+
+
+    }
+
+    public void downloadOrPopulateFromDatabase(){
         if (!currentDay.equals(lastDownload)) {
+            Log.e(TAG,"Before"+currentDay+" "+lastDownload);
             lastDownload = currentDay;
             lastUpdatedRef.setValue(lastDownload);
             String name=user.getUid();
+            Log.e(TAG,"Here is is"+currentDay+" "+lastDownload);
             //different day, remove previous stored markers and download new ones
             database.child("Markers").child(name).removeValue(new DatabaseReference.CompletionListener() {
                 @Override
@@ -427,12 +448,10 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
                 }
             });
         }
-                else {
-            System.out.println("We already downloaded this. Repopulate:");
-            Log.i("UIIII", "repopulaaate");
+        else {
+           Toast.makeText(getApplicationContext(),"Welcome back!",Toast.LENGTH_SHORT).show();
             repopulate();
         }
-
 
     }
 
@@ -476,6 +495,7 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
 
     // method to restore game markers, if they have been already downloaded for the day
     public void repopulate() {
+        Log.e(TAG,"Repopulating from database");
         mMap.clear();
 
         markersDb.addListenerForSingleValueEvent(
@@ -484,6 +504,8 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         //Get map of users in datasnapshot
                         collectOldMarkers((Map<String,Object>) dataSnapshot.getValue());
+
+                        markers_loaded=true;
                     }
 
                     @Override
@@ -568,9 +590,9 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
         mMap.animateCamera(CameraUpdateFactory.zoomTo(18));
 
         //stop location updates
-        if (mGoogleApiClient != null) {
-            LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
-        }
+//        if (mGoogleApiClient != null) {
+//            LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
+//        }
 
     }
 
@@ -670,6 +692,7 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
                     System.out.println(url);
                     // fetch data
                     new DownloadLetters().execute(url);
+
                 } else {
                     showInternetAlert();
                 }
@@ -787,7 +810,6 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
                     mMap.addMarker(new MarkerOptions().position(new LatLng(e.getLat(), e.getLng())).title(e.getDescription()).visible(true));
                     //save markers for latter use
 
-
                     DatabaseReference newMarker = markersDb.child(e.getAsKey());
                     newMarker.child("lat").setValue(e.getLat());
                     newMarker.child("lng").setValue(e.getLng());
@@ -797,6 +819,7 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
 
             }
             markers_loaded = true;
+
         }
 
         // Uploads XML from stackoverflow.com, parses it, and combines it with
@@ -841,6 +864,51 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
     @Override
     public void onBackPressed() {
         moveTaskToBack(true);
+    }
+
+    private void installListener() {
+
+        if (broadcastReceiver == null) {
+
+            broadcastReceiver = new BroadcastReceiver() {
+
+                @Override
+                public void onReceive(Context context, Intent intent) {
+
+                    Bundle extras = intent.getExtras();
+
+                    NetworkInfo info = (NetworkInfo) extras
+                            .getParcelable("networkInfo");
+
+                    NetworkInfo.State state = info.getState();
+
+                    if (state == NetworkInfo.State.CONNECTED) {
+
+                      if(!markers_loaded&&onCreateDone) {
+                          Log.e(TAG,"Broadcats thingy made me do it");
+                         // downloadOrPopulateFromDatabase();
+
+                      }
+
+
+                    } else {
+
+
+                        if(!markers_loaded){
+                            Toast.makeText(getApplicationContext(), "Turn on your internet connection.", Toast.LENGTH_LONG).show();
+                        }
+                        else {
+                            Toast.makeText(getApplicationContext(), "Internet connection is off.", Toast.LENGTH_LONG).show();
+                        }
+                    }
+
+                }
+            };
+
+            final IntentFilter intentFilter = new IntentFilter();
+            intentFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
+            registerReceiver(broadcastReceiver, intentFilter);
+        }
     }
 
     public void showDialog(String title,String message){

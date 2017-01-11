@@ -34,8 +34,9 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:id="@+id/tvcheckWord"
-            android:textAppearance="@style/TextAppearance.AppCompat.Display1"
-            android:textSize="12sp" />
+            android:text="Congrats!2
+            "
+            android:textAppearance="@style/TextAppearance.AppCompat.Display3" />
 
         <android.support.design.widget.FloatingActionButton
             android:id="@+id/welldone_cancel"
