@@ -301,7 +301,7 @@ public class MainActivity extends BaseActivity implements
             DatabaseReference challengesDb=database.child("Challenges").child(user.getUid());
 
             database.child("Statistics").child(user.getUid()).child("NumberOfWords").setValue(0);
-            database.child("Statistics").child(user.getUid()).child("NumberOfHints").setValue(0);
+            database.child("Statistics").child(user.getUid()).child("NumberOfHints").setValue(1);
             database.child("Statistics").child(user.getUid()).child("NumberOfLetters").setValue(0);
 
             challengesDb.child("consecdays").setValue(new Challenge("Play the game on consecutive days" ));

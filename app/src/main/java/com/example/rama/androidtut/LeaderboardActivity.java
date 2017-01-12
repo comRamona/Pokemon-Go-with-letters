@@ -59,7 +59,7 @@ public class LeaderboardActivity extends AppCompatActivity {
         scoreDb=database.child("Scores").getRef();
         queryRef = scoreDb.orderByChild("score").limitToLast(10);
 
-        queryRef.addValueEventListener(valueEventListener=new ValueEventListener() {
+        queryRef.addListenerForSingleValueEvent(valueEventListener=new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
 
@@ -67,11 +67,8 @@ public class LeaderboardActivity extends AppCompatActivity {
                 Score myScore=null;
                 int i=1;
                 int p=0;
+                long total=dataSnapshot.getChildrenCount();
                 for (DataSnapshot postSnapshot: dataSnapshot.getChildren()) {
-                    //Score score=postSnapshot.getValue(Score.class);
-
-                    //System.out.println(postSnapshot.getKey()+" hdfhdj "+postSnapshot.getValue());
-                    Log.i(TAG,postSnapshot.getValue().toString());
                     Score score =postSnapshot.getValue(Score.class);
                     if(score.getName().equals(user.getEmail())) {
                         myScore = score;
@@ -80,7 +77,7 @@ public class LeaderboardActivity extends AppCompatActivity {
                     }
 
                     else {
-                        listItemList.add(new ListItem(i + "." + score.getName(), Integer.toString(score.getScore())));
+                        listItemList.add(new ListItem((total-i+1) + "." + score.getName(), Integer.toString(score.getScore())));
 
                     }
                     i++;
@@ -88,7 +85,7 @@ public class LeaderboardActivity extends AppCompatActivity {
                 }
                 Collections.reverse(listItemList);
                 if(myScore!=null) {
-                    listItemList.add(0, new ListItem(p+"."+myScore.getName(),Integer.toString(myScore.getScore())));
+                    listItemList.add(0, new ListItem((total-p+1)+"."+myScore.getName(),Integer.toString(myScore.getScore())));
                 }
                 adapter.notifyDataSetChanged();
             }

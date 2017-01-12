@@ -144,9 +144,7 @@ public class ChallengeManager {
             changeNumberOfHints(1);
             challengeDb.child(newTotal+"words").child("completed").setValue(true);
         }
-//        String format = "dd/MM/yyyy";
-//        DateFormat sdf = new SimpleDateFormat(format);
-//        Date date=Calendar.getInstance().getTime();
+
         allWords.child(word).getRef().setValue(scoreToAdd);
         statisticsDb.child("NumberOfWords").getRef().setValue(numberOfWords+1);
 
@@ -159,10 +157,10 @@ public class ChallengeManager {
                 }
             if(allLetters){
                 challengeDb.child("eachletterword").child("completed").setValue(true);
-                changeNumberOfHints(1);
+                changeNumberOfHints(2);
                 android.support.v7.app.AlertDialog alertDialog2 = getAlertDialog(context);
                 alertDialog2.setMessage("You have created a word starting with each letter of the" +
-                        " alphabet! That's impressive! Here is one bonus hint!");
+                        " alphabet! That's impressive! Here are 2 bonus hints!");
                 alertDialog2.show();
             }
         }
@@ -174,9 +172,9 @@ public class ChallengeManager {
             challengeDb.child("consecdays").child("completed").getRef().setValue(true);
             android.support.v7.app.AlertDialog alertDialog = getAlertDialog(context);
             alertDialog.setMessage("You have played the game on consecutive days! \n" +
-                    "Here is a bonus hint for you!");
+                    "Here are 2 bonus hints for you!");
             alertDialog.show();
-            changeNumberOfHints(1);
+            changeNumberOfHints(2);
         }
     }
 
@@ -194,9 +192,9 @@ public class ChallengeManager {
                 challengeDb.child("1eachletter").child("completed").getRef();
                 android.support.v7.app.AlertDialog alertDialog = getAlertDialog(context);
                 alertDialog.setMessage("You have collected 1 of each letter! \n" +
-                        "Here is a bonus hint for you!");
+                        "Here are bonus hints for you!");
                 alertDialog.show();
-                changeNumberOfHints(1);
+                changeNumberOfHints(3);
             }
         }
         if(fiveEach){
@@ -204,9 +202,9 @@ public class ChallengeManager {
                 challengeDb.child("5eachletter").child("completed").getRef();
                 android.support.v7.app.AlertDialog alertDialog = getAlertDialog(context);
                 alertDialog.setMessage("You have collected 5 of each letter! \n" +
-                        "Here is a bonus hint for you!");
+                        "Here are 3 bonus hints for you!");
                 alertDialog.show();
-                changeNumberOfHints(1);
+                changeNumberOfHints(3);
             }
         }
     }
@@ -232,10 +230,10 @@ public class ChallengeManager {
         if(!allChallenges.get("score2000").isCompleted()&&score>=2000){
             challengeDb.child("score2000").child("completed").getRef().setValue(true);
             android.support.v7.app.AlertDialog alertDialog = getAlertDialog(context);
-            alertDialog.setMessage("You have achieved a score of 2000! Here is a bonus hint " +
+            alertDialog.setMessage("You have achieved a score of 2000! Here are 5 bonus hints " +
                     "for you");
             alertDialog.show();
-            changeNumberOfHints(1);
+            changeNumberOfHints(5);
         }
     }
     public static ChallengeManager getInstance(){
