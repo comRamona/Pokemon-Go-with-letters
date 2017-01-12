@@ -1,12 +1,12 @@
 package com.example.rama.androidtut;
 
-import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -14,25 +14,21 @@ import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewGroup.LayoutParams;
 import android.widget.Button;
 import android.widget.GridView;
+import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.TextView;
-
-import android.graphics.Color;
-import android.view.Gravity;
-import android.view.ViewGroup.LayoutParams;
-import android.widget.LinearLayout;
 import android.widget.Toast;
-
 
 import com.example.rama.androidtut.UtilityClasses.ChallengeManager;
 import com.example.rama.androidtut.UtilityClasses.LetterAdapter;
 import com.example.rama.androidtut.UtilityClasses.LetterValues;
-import com.example.rama.androidtut.UtilityClasses.ListItem;
 import com.example.rama.androidtut.UtilityClasses.Score;
 import com.example.rama.androidtut.UtilityClasses.Trie;
 import com.google.firebase.auth.FirebaseAuth;
@@ -57,45 +53,53 @@ public class WordArenaActivity extends AppCompatActivity {
 
 
     SharedPreferences sharedPref;
-    //text views for each letter in the answer
+    //text view containing 7 characters to be filled by the user
     private TextView[] charViews;
-    //letter button adapter
+    //submit button
     private Button submitButton;
+    //pop window when pressing submit
+    private PopupWindow pwindo;
+    //letter adapter for displaying letter inventory
     private LetterAdapter ltrAdapt;
+    //challenge manager to be notified when a new word is created
+    private ChallengeManager challengeManager;
+    /**
+     * Database references
+     */
     private DatabaseReference[] letterRefs;
-    private int[] letterCounts;
     private DatabaseReference scoreDb;
     private DatabaseReference hintsDb;
-    private PopupWindow pwindo;
+    //leter inventory counters
     private int[] temporaryCount;
-    private ChallengeManager challengeManager;
+    private int[] letterCounts;
+    //number of hints
     private int noHints;
+    //dictionary storing possible words
     private Trie dictionary;
-
-    private BroadcastReceiver broadcastReceiver;
+    //broadcat receiver to monitor internet connection(needed for maintaining database state)
+    private BroadcastReceiver internetBroadcastReceiver;
     int chosen=0;
 
+    /**
+     * Get view and database connections
+     * @param savedInstanceState
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_word_arena);
 
-        sharedPref = this.getSharedPreferences(getString(R.string.preference_file_letters), Context.MODE_PRIVATE);
-
-
+        //get view resources and initialize variables
         submitButton = (Button) findViewById(R.id.yes);
-        submitButton.setEnabled(false);
-        //create new array for character text views
-        charViews = new TextView[7];
-
-        //remove any existing letters
+        final Button hintButton=(Button) findViewById(R.id.hints);
         LinearLayout wordLayout = (LinearLayout) findViewById(R.id.word);
-
-        //get letter button grid
         GridView letters = (GridView) findViewById(R.id.letters);
 
+        //initialize variables
+        charViews = new TextView[7];
         ltrAdapt=new LetterAdapter(this);
         letters.setAdapter(ltrAdapt);
+        submitButton.setEnabled(false);
 
         //loop through characters
         for (int c = 0; c < 7; c++) {
@@ -109,6 +113,8 @@ public class WordArenaActivity extends AppCompatActivity {
             wordLayout.addView(charViews[c]);
 
         }
+
+        //initialize database references and get values
         DatabaseReference database = FirebaseDatabase.getInstance().getReference();
         FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
         FirebaseUser user = firebaseAuth.getCurrentUser();
@@ -127,7 +133,6 @@ public class WordArenaActivity extends AppCompatActivity {
             }
         });
 
-        final Button hintButton=(Button) findViewById(R.id.hints);
         hintsDb=database.child("Statistics").child(user.getUid()).child("NumberOfHints").getRef();
 
                 hintsDb.addValueEventListener(new ValueEventListener() {
@@ -176,6 +181,9 @@ public class WordArenaActivity extends AppCompatActivity {
     }
 
 
+    /**
+     * Load the dictionary file in memory, using a trie as a data structure
+     */
     private void loadDictionary(){
         dictionary =new Trie();
         try {
@@ -312,21 +320,21 @@ public class WordArenaActivity extends AppCompatActivity {
 
     }
 
-    private int calculateScore(String word){
+    private static int calculateScore(String word){
         int sc=0;
         for(int i=0;i<word.length();i++){
             sc+=LetterValues.getValue(word.charAt(i));
         }
         return sc;
     }
-    public String getCurrentWord(){
+    private String getCurrentWord(){
         StringBuilder sb=new StringBuilder();
         for(int i=0;i<7;i++)
             sb.append(charViews[i].getText());
         return sb.toString().toUpperCase();
     }
 
-    public void updateCounts(String word){
+    private void updateCounts(String word){
         for(int i=0;i<word.length();i++){
             int pos=word.charAt(i)-'A';
             int t=temporaryCount[pos];
@@ -358,7 +366,7 @@ public class WordArenaActivity extends AppCompatActivity {
         }
     }
 
-    public String checkMatch(List<String> res){
+    private String checkMatch(List<String> res){
         Map<Character,Integer> counter=new HashMap<>();
         for(String s:res){
             counter.clear();
@@ -395,9 +403,9 @@ public class WordArenaActivity extends AppCompatActivity {
 
     private void installListener() {
 
-        if (broadcastReceiver == null) {
+        if (internetBroadcastReceiver == null) {
 
-            broadcastReceiver = new BroadcastReceiver() {
+            internetBroadcastReceiver = new BroadcastReceiver() {
 
                 @Override
                 public void onReceive(Context context, Intent intent) {
@@ -427,7 +435,7 @@ public class WordArenaActivity extends AppCompatActivity {
 
             final IntentFilter intentFilter = new IntentFilter();
             intentFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
-            registerReceiver(broadcastReceiver, intentFilter);
+            registerReceiver(internetBroadcastReceiver, intentFilter);
         }
     }
 }
