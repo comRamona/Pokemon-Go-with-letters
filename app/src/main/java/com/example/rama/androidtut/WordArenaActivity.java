@@ -33,6 +33,7 @@ import com.example.rama.androidtut.UtilityClasses.ChallengeManager;
 import com.example.rama.androidtut.UtilityClasses.LetterAdapter;
 import com.example.rama.androidtut.UtilityClasses.LetterValues;
 import com.example.rama.androidtut.UtilityClasses.ListItem;
+import com.example.rama.androidtut.UtilityClasses.Score;
 import com.example.rama.androidtut.UtilityClasses.Trie;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -44,7 +45,6 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.io.InputStream;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
@@ -117,7 +117,7 @@ public class WordArenaActivity extends AppCompatActivity {
         scoreDb.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                score=dataSnapshot.getValue(ListItem.class).getScore();
+                score=(int) dataSnapshot.getValue(Score.class).getScore();
             }
 
             @Override
@@ -268,19 +268,6 @@ public class WordArenaActivity extends AppCompatActivity {
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View layout = inflater.inflate(R.layout.popup_word,
                 (ViewGroup) findViewById(R.id.show_word));
-        pwindo = new PopupWindow(layout, 800, 800, true);
-        pwindo.showAtLocation(layout, Gravity.CENTER, 0, 0);
-        pwindo.setBackgroundDrawable(new ColorDrawable());
-        FloatingActionButton fab_close = (FloatingActionButton) layout.findViewById(R.id.welldone_cancel);
-        fab_close.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                pwindo.dismiss();
-
-            }
-        });
-        TextView textView=(TextView) layout.findViewById(R.id.tvcheckWord);
-        textView.setText("Congrats!Yu have discovere a new word! \n SEVENTY");
         ltrAdapt.reset(letterCounts);
         for(int i=0;i<7;i++)
             charViews[i].setText("");
@@ -309,8 +296,9 @@ public class WordArenaActivity extends AppCompatActivity {
         String word=getCurrentWord();
         String response=word+" is not a valid word. Try again!";
         if(dictionary.contains(word)){
-            response="You have discovered a new word!\n"+word;
+
             int scoreToAdd=calculateScore(word);
+            response=word+"\n"+scoreToAdd+" points";
             int newScore=score+scoreToAdd;
             challengeManager.checkWord(word,this,scoreToAdd);
             challengeManager.checkScore(newScore,this);
@@ -318,7 +306,7 @@ public class WordArenaActivity extends AppCompatActivity {
             updateCounts(word);
 
         }
-        textView.setTextSize(24);
+        textView.setTextSize(18);
         textView.setText(response);
         refreshScreen(view);
 
@@ -348,23 +336,26 @@ public class WordArenaActivity extends AppCompatActivity {
 
     public void giveHint(View view){
 
-        hintsDb.setValue(noHints-1);
-        String prefix=getCurrentWord();
-        String message="You need to input at least 3 letters to get a hint.";
-        if(prefix.length()>=3){
-            List<String> res= dictionary.getAllWordsStartingWith(prefix);
-            Log.w(TAG,prefix);
-            if(res==null||res.size()==0) message="No completion found.";
-            else {
-                String match=checkMatch(res);
-                if(match==null) message="No completion found. With a few more letters you could form "+res.get(0);
-                else message="How about "+match+"?";
+        if(noHints>=1) {
+            String prefix = getCurrentWord();
+            String message = "You need to input at least 3 letters to get a hint.";
+            if (prefix.length() >= 3) {
+                hintsDb.setValue(noHints - 1);
+                List<String> res = dictionary.getAllWordsStartingWith(prefix);
+                Log.w(TAG, prefix);
+                if (res == null || res.size() == 0) message = "No completion found.";
+                else {
+                    String match = checkMatch(res);
+                    if (match == null)
+                        message = "No completion found. With a few more letters you could form " + res.get(0);
+                    else message = "How about " + match + "?";
+                }
             }
+            android.support.v7.app.AlertDialog alertDialog = getAlertDialog(this);
+            alertDialog.setMessage(message);
+            alertDialog.setTitle("Hint");
+            alertDialog.show();
         }
-        android.support.v7.app.AlertDialog alertDialog=getAlertDialog(this);
-        alertDialog.setMessage(message);
-        alertDialog.setTitle("Hint");
-        alertDialog.show();
     }
 
     public String checkMatch(List<String> res){
@@ -375,7 +366,7 @@ public class WordArenaActivity extends AppCompatActivity {
             for(int i=0;i<26;i++){
                 counter.put(((char)(i+'A')),temporaryCount[i]);
             }
-            for(int i=0;i<res.size();i++){
+            for(int i=0;i<s.length();i++){
                 if(counter.get(s.charAt(i))>0){
                     counter.put(s.charAt(i),counter.get(s.charAt(i))-1);
                 }
@@ -400,23 +391,7 @@ public class WordArenaActivity extends AppCompatActivity {
         alertDialog.setTitle(("Message"));
         return alertDialog;
     }
-    public ProgressDialog mProgressDialog;
 
-    public void showProgressDialog() {
-        if (mProgressDialog == null) {
-            mProgressDialog = new ProgressDialog(this);
-            mProgressDialog.setMessage(getString(R.string.loading));
-            mProgressDialog.setIndeterminate(true);
-        }
-
-        mProgressDialog.show();
-    }
-
-    public void hideProgressDialog() {
-        if (mProgressDialog != null && mProgressDialog.isShowing()) {
-            mProgressDialog.dismiss();
-        }
-    }
 
     private void installListener() {
 

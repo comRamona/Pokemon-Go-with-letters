@@ -4,9 +4,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.ListView;
+import android.widget.TextView;
 
-import com.example.rama.androidtut.UtilityClasses.ItemListAdapter;
+import com.example.rama.androidtut.UtilityClasses.ListItemAdapter;
 import com.example.rama.androidtut.UtilityClasses.ListItem;
+import com.example.rama.androidtut.UtilityClasses.Score;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -31,7 +33,7 @@ public class LeaderboardActivity extends AppCompatActivity {
     static String TAG = "LeaderboardActivity";
     private List<ListItem> listItemList = new ArrayList<>();
     private ListView listView;
-    private ItemListAdapter adapter;
+    private ListItemAdapter adapter;
     private DatabaseReference database;
     private FirebaseAuth firebaseAuth;
     private FirebaseUser user;
@@ -41,10 +43,14 @@ public class LeaderboardActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_leaderboard);
+        setContentView(R.layout.header_footer);
 
         listView = (ListView) findViewById(R.id.toplist);
-        adapter = new ItemListAdapter(this, listItemList);
+        TextView tv=(TextView) findViewById(R.id.bodytextleft);
+        tv.setText("Email");
+        TextView tv2=(TextView) findViewById(R.id.bodytextright);
+        tv2.setText("Score");
+        adapter = new ListItemAdapter(this, listItemList);
         listView.setAdapter(adapter);
 
         database = FirebaseDatabase.getInstance().getReference();
@@ -58,16 +64,32 @@ public class LeaderboardActivity extends AppCompatActivity {
             public void onDataChange(DataSnapshot dataSnapshot) {
 
 
+                Score myScore=null;
+                int i=1;
+                int p=0;
                 for (DataSnapshot postSnapshot: dataSnapshot.getChildren()) {
                     //Score score=postSnapshot.getValue(Score.class);
 
                     //System.out.println(postSnapshot.getKey()+" hdfhdj "+postSnapshot.getValue());
                     Log.i(TAG,postSnapshot.getValue().toString());
-                    ListItem listItem =postSnapshot.getValue(ListItem.class);
-                    listItemList.add(listItem);
+                    Score score =postSnapshot.getValue(Score.class);
+                    if(score.getName().equals(user.getEmail())) {
+                        myScore = score;
+                        myScore.setName("ME");
+                        p=i;
+                    }
+
+                    else {
+                        listItemList.add(new ListItem(i + "." + score.getName(), Integer.toString(score.getScore())));
+
+                    }
+                    i++;
 
                 }
                 Collections.reverse(listItemList);
+                if(myScore!=null) {
+                    listItemList.add(0, new ListItem(p+"."+myScore.getName(),Integer.toString(myScore.getScore())));
+                }
                 adapter.notifyDataSetChanged();
             }
 

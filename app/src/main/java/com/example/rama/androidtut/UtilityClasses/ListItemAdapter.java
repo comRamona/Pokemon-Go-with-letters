@@ -6,6 +6,7 @@ package com.example.rama.androidtut.UtilityClasses;
 
 
         import android.content.Context;
+        import android.graphics.Color;
         import android.view.LayoutInflater;
         import android.view.View;
         import android.view.ViewGroup;
@@ -16,7 +17,7 @@ package com.example.rama.androidtut.UtilityClasses;
 
         import java.util.List;
 
-public class ItemListAdapter extends BaseAdapter {
+public class ListItemAdapter extends BaseAdapter {
 
     private  Context mContext;
     private LayoutInflater inflater;
@@ -24,7 +25,7 @@ public class ItemListAdapter extends BaseAdapter {
 
 
 
-    public ItemListAdapter(Context context, List<ListItem> itemsItems) {
+    public ListItemAdapter(Context context, List<ListItem> itemsItems) {
         this.mContext = context;
         this.itemsItems = itemsItems;
 
@@ -46,35 +47,35 @@ public class ItemListAdapter extends BaseAdapter {
     }
 
     @Override
-    public View getView(int position, View scoreView, ViewGroup parent) {
+    public View getView(int position, View twoFieldsView, ViewGroup parent) {
         ViewHolder holder;
         if (inflater == null) {
             inflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         }
-        if (scoreView == null) {
+        if (twoFieldsView == null) {
 
-            scoreView = inflater.inflate(R.layout.list_row, parent, false);
+            twoFieldsView = inflater.inflate(R.layout.list_row, parent, false);
             holder = new ViewHolder();
-            holder.name = (TextView) scoreView.findViewById(R.id.topname);
-            holder.score = (TextView) scoreView.findViewById(R.id.topscore);
+            holder.fieldOne = (TextView) twoFieldsView.findViewById(R.id.topname);
+            holder.fieldTwo = (TextView) twoFieldsView.findViewById(R.id.topscore);
 
-            scoreView.setTag(holder);
+            twoFieldsView.setTag(holder);
 
         } else {
-            holder = (ViewHolder) scoreView.getTag();
+            holder = (ViewHolder) twoFieldsView.getTag();
         }
 
         final ListItem m = itemsItems.get(position);
-        holder.name.setText(m.getName());
-        holder.score.setText(String.valueOf(m.getScore()));
+        holder.fieldOne.setText(m.getFieldOne().toString());
 
-        return scoreView;
+        holder.fieldTwo.setText(String.valueOf(m.getFieldTwo()));
+        return twoFieldsView;
     }
 
     static class ViewHolder {
 
-        TextView name;
-        TextView score;
+        TextView fieldOne;
+        TextView fieldTwo;
 
     }
 

@@ -273,6 +273,7 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
                 @Override
                 public void onClick(View v) {
 
+                    Toast.makeText(CampusMapActivity.this, "Saving your data..", Toast.LENGTH_SHORT).show();
                     Intent intent = new Intent(getApplicationContext(), WordArenaActivity.class);
                     pwindo.dismiss();
                     startActivity(intent);

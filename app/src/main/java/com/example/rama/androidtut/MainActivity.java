@@ -18,7 +18,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.rama.androidtut.UtilityClasses.Challenge;
-import com.example.rama.androidtut.UtilityClasses.ListItem;
+import com.example.rama.androidtut.UtilityClasses.Score;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
@@ -296,22 +296,22 @@ public class MainActivity extends BaseActivity implements
 
         }
             gamePlayDb.child("lastDownload").setValue("");
-            ListItem listItem =new ListItem(user.getEmail(),0);
-            database.child("Scores").child(user.getUid()).setValue(listItem);
+            Score score=new Score(user.getEmail(),0);
+            database.child("Scores").child(user.getUid()).setValue(score);
             DatabaseReference challengesDb=database.child("Challenges").child(user.getUid());
 
             database.child("Statistics").child(user.getUid()).child("NumberOfWords").setValue(0);
             database.child("Statistics").child(user.getUid()).child("NumberOfHints").setValue(0);
             database.child("Statistics").child(user.getUid()).child("NumberOfLetters").setValue(0);
 
-            challengesDb.child("consecdays").setValue(new Challenge("Play the game on consecutive days"));
-            challengesDb.child("100letters").setValue(new Challenge("Collect 100 letters"));
-            challengesDb.child("1words").setValue(new Challenge("Discover one word"));
-            challengesDb.child("5words").setValue(new Challenge("Discover 5 words"));
-            challengesDb.child("1eachletter").setValue(new Challenge("Collect at least one of each letter"));
-            challengesDb.child("5eachletter").setValue(new Challenge("Collect at least 5 of each letter"));
-            challengesDb.child("eachletterword").setValue(new Challenge("Discover a word starting witch each letter"));
-            challengesDb.child("score2000").setValue(new Challenge("Score 2000 points"));
+            challengesDb.child("consecdays").setValue(new Challenge("Play the game on consecutive days" ));
+            challengesDb.child("100letters").setValue(new Challenge("Collect 100 letters" ));
+            challengesDb.child("1words").setValue(new Challenge("Discover one word" ));
+            challengesDb.child("5words").setValue(new Challenge("Discover 5 words" ));
+            challengesDb.child("1eachletter").setValue(new Challenge("Collect at least one of each letter" ));
+            challengesDb.child("5eachletter").setValue(new Challenge("Collect at least 5 of each letter" ));
+            challengesDb.child("eachletterword").setValue(new Challenge("Discover a word starting witch each letter" ));
+            challengesDb.child("score2000").setValue(new Challenge("Score 2000 points" ));
 
     }
 

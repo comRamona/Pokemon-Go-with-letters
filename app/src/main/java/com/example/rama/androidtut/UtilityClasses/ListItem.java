@@ -7,32 +7,33 @@ package com.example.rama.androidtut.UtilityClasses;
 
 public class ListItem {
 
-    private String name;
-    private int score;
+    private String fieldOne;
+    private String fieldTwo;
 
     public ListItem() {
     }
 
-    public ListItem(String name, int score) {
+    public ListItem(String fieldOne, String fieldTwo) {
 
-        this.name = name;
-        this.score = score;
+        this.fieldOne = fieldOne;
+        this.fieldTwo = fieldTwo;
 
     }
 
-    public String getName() {
-        return name;
+    public String getFieldOne() {
+        return fieldOne;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setFieldOne(String fieldOne) {
+        this.fieldOne = fieldOne;
     }
 
-    public int getScore() {
-        return score;
+    public String getFieldTwo() {
+        return fieldTwo;
     }
 
-    public void setScore(int score) {
-        this.score = score;
+    public void setFieldTwo(String fieldTwo) {
+        this.fieldTwo = fieldTwo;
     }
+
 }

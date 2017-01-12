@@ -7,7 +7,6 @@ package com.example.rama.androidtut.UtilityClasses;
 public class Challenge {
     private String description;
     private boolean completed;
-    private int rank;
 
     public Challenge(){
         this("");
@@ -16,13 +15,11 @@ public class Challenge {
     public Challenge(String description){
         this.description=description;
         this.completed=false;
-        this.rank=0;
     }
 
-    public Challenge(boolean completed, String description, int rank) {
+    public Challenge(boolean completed, String description) {
         this.completed = completed;
         this.description = description;
-        this.rank = rank;
     }
 
     public String getDescription() {
@@ -41,11 +38,5 @@ public class Challenge {
         this.completed = completed;
     }
 
-    public int getRank() {
-        return rank;
-    }
 
-    public void setRank(int rank) {
-        this.rank = rank;
-    }
 }

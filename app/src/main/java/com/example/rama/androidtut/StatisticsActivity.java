@@ -4,8 +4,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.ListView;
+import android.widget.TextView;
 
-import com.example.rama.androidtut.UtilityClasses.ItemListAdapter;
+import com.example.rama.androidtut.UtilityClasses.ListItemAdapter;
 import com.example.rama.androidtut.UtilityClasses.ListItem;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -31,7 +32,7 @@ public class StatisticsActivity extends AppCompatActivity {
     static String TAG = "StatisticsActivity";
     private List<ListItem> listItemList = new ArrayList<>();
     private ListView listView;
-    private ItemListAdapter adapter;
+    private ListItemAdapter adapter;
     private DatabaseReference database;
     private FirebaseAuth firebaseAuth;
     private FirebaseUser user;
@@ -41,17 +42,19 @@ public class StatisticsActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_leaderboard);
+        setContentView(R.layout.header_footer);
 
         listView = (ListView) findViewById(R.id.toplist);
-        adapter = new ItemListAdapter(this, listItemList);
+        TextView tv=(TextView) findViewById(R.id.bodytextleft);
+        tv.setText("Your words:");
+        adapter = new ListItemAdapter(this, listItemList);
         listView.setAdapter(adapter);
 
         database = FirebaseDatabase.getInstance().getReference();
         firebaseAuth= FirebaseAuth.getInstance();
         user = firebaseAuth.getCurrentUser();
         scoreDb=database.child("Statistics").child(user.getUid()).child("AllWords").getRef();
-        queryRef = scoreDb.orderByChild("score").limitToLast(100);
+        queryRef = scoreDb.orderByValue().limitToLast(100);
 
         queryRef.addValueEventListener(valueEventListener=new ValueEventListener() {
             @Override
@@ -59,11 +62,7 @@ public class StatisticsActivity extends AppCompatActivity {
 
 
                 for (DataSnapshot postSnapshot: dataSnapshot.getChildren()) {
-                    //Score score=postSnapshot.getValue(Score.class);
-
-                    //System.out.println(postSnapshot.getKey()+" hdfhdj "+postSnapshot.getValue());
-                    Log.i(TAG,postSnapshot.getValue().toString());
-                    ListItem listItem =new ListItem(postSnapshot.getKey(),postSnapshot.getValue(Integer.class));
+                    ListItem listItem =new ListItem(postSnapshot.getKey(),postSnapshot.getValue(Integer.class).toString());
                     listItemList.add(listItem);
 
                 }

@@ -10,41 +10,63 @@
     android:weightSum="1">
 
     <LinearLayout
-        android:layout_width="348dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
 
         android:orientation="vertical"
-        android:weightSum="1"
-        android:layout_weight="0.47">
-
-
-        <TextView
-            android:text="How to play:"
-            android:layout_width="match_parent"
+        >
+        <ScrollView
+            android:id="@+id/scroll_view"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:id="@+id/textView1"
-            android:textAppearance="@style/TextAppearance.AppCompat.Display1" />
+           >
+
+            <TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="15dp"
+
+                >
+                <TableRow
+                    >
+
+                    <TextView
+                        android:layout_column="1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/Red"
+
+                        android:textSize="20dp"
+                        android:text="•"></TextView>
+                    <TextView
+                        android:layout_column="2"
+                        android:layout_height="wrap_content"
+                        android:layout_width="wrap_content"
+                        android:layout_marginBottom="5dp"
+                        android:text="Collect letters from all over the campus by going close to a letter and clicking on it.\nForm 7 letter words with your collected letters. "></TextView>
+                </TableRow>
+                <TableRow>
+                    <TextView
+                        android:layout_column="1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="20dp"
+                        android:textColor="@color/Blue"
+                        android:text="•"></TextView>
+                    <TextView
+                        android:layout_column="2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="5dp"
+                        android:text="Click the (...) options  menu to access your Challenges, Leaderboard, Statistics and Word Arena.  If yu get stuck, simply input at least 3 letters and press Hint. \nYou get more hints by completing challenges."></TextView>
+                </TableRow>
+            </TableLayout>
+
+        </ScrollView>
 
 
-        <TextView
-            android:text="Collect letters from all over the campus by going close to a letter and licking on it."
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:id="@+id/textView2"
-            android:textAppearance="@style/TextAppearance.AppCompat.Display1"
-            android:textSize="16sp"
-            android:layout_weight="0.32" />
-        <TextView
-            android:text="Form 7 letter words with your collected letters. Click the (...) options  menu to access your Challenges, Leaderboard, Statistics and Word Arena. You can create new words in Word Arena, with the letters you have collecte. If yu get stucks, simply input at least 3 letters and press Hint. You get more hints by completing challenges."
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:id="@+id/textView3"
-            android:textAppearance="@style/TextAppearance.AppCompat.Display1"
-            android:textSize="16sp"
-            android:layout_weight="0.29" />
+
+
 
         <android.support.design.widget.FloatingActionButton
             android:id="@+id/instr_cancel"

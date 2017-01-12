@@ -66,7 +66,7 @@ public class KxmlParser {
         }
     }
 
-    // Parses the contents of an entry. If it encounters a name, summary, or description tag, hands them off
+    // Parses the contents of an entry. If it encounters a fieldOne, summary, or description tag, hands them off
 // to their respective "read" methods for processing. Otherwise, skips the tag.
     private Placemark readEntry(XmlPullParser parser) throws XmlPullParserException, IOException {
         parser.require(XmlPullParser.START_TAG, ns, "Placemark");
@@ -78,7 +78,7 @@ public class KxmlParser {
                 continue;
             }
             String name = parser.getName();
-            if (name.equals("name")) {
+            if (name.equals("fieldOne")) {
                 title = readName(parser);
             } else if (name.equals("description")) {
                 summary = readDescription(parser);
@@ -114,11 +114,11 @@ public class KxmlParser {
         return coord;
     }
 
-    // Processes name tags in the feed.
+    // Processes fieldOne tags in the feed.
     private String readName(XmlPullParser parser) throws IOException, XmlPullParserException {
-        parser.require(XmlPullParser.START_TAG, ns, "name");
+        parser.require(XmlPullParser.START_TAG, ns, "fieldOne");
         String title = readText(parser);
-        parser.require(XmlPullParser.END_TAG, ns, "name");
+        parser.require(XmlPullParser.END_TAG, ns, "fieldOne");
         return title;
     }
 
@@ -145,7 +145,7 @@ public class KxmlParser {
         return summary;
     }
 
-    // For the tags name and summary, extracts their text values.
+    // For the tags fieldOne and summary, extracts their text values.
     private String readText(XmlPullParser parser) throws IOException, XmlPullParserException {
         String result = "";
         if (parser.next() == XmlPullParser.TEXT) {
