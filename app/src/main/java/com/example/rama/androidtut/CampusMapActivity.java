@@ -247,6 +247,34 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
 
 
 
+    public void fab_cancel(View view){
+        pwindo.dismiss();
+    }
+    public void fab_new(View view){
+        Toast.makeText(CampusMapActivity.this, "Saving your data..", Toast.LENGTH_SHORT).show();
+        Intent intent = new Intent(getApplicationContext(), WordArenaActivity.class);
+        pwindo.dismiss();
+        startActivity(intent);
+    }
+    public void fab_leaderboard(View view){
+        Intent intent = new Intent(getApplicationContext(), LeaderboardActivity.class);
+        pwindo.dismiss();
+        startActivity(intent);
+    }
+
+    public void fab_stats(View view){
+        Intent intent = new Intent(getApplicationContext(),  StatisticsActivity.class);
+        pwindo.dismiss();
+        startActivity(intent);
+
+    }
+
+    public void fab_challenges(View view){
+        Intent intent = new Intent(getApplicationContext(), ChallengesActivity.class);
+        pwindo.dismiss();
+        startActivity(intent);
+    }
+
     public void showOptionsDialog() {
         try {
 // We need to get the instance of the LayoutInflater
@@ -257,63 +285,6 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
             pwindo = new PopupWindow(layout, 800, 800, true);
             pwindo.showAtLocation(layout, Gravity.CENTER, 0, 0);
             pwindo.setBackgroundDrawable(new ColorDrawable());
-            // layout.getBackground().setAlpha(240);
-
-            FloatingActionButton fab_close = (FloatingActionButton) layout.findViewById(R.id.fab_cancel);
-            fab_close.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    pwindo.dismiss();
-
-                }
-            });
-
-            FloatingActionButton fab_new = (FloatingActionButton) layout.findViewById(R.id.fab_new);
-            fab_new.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-
-                    Toast.makeText(CampusMapActivity.this, "Saving your data..", Toast.LENGTH_SHORT).show();
-                    Intent intent = new Intent(getApplicationContext(), WordArenaActivity.class);
-                    pwindo.dismiss();
-                    startActivity(intent);
-
-                }
-            });
-
-            FloatingActionButton fab_instr = (FloatingActionButton) layout.findViewById(R.id.fab_leaderboard);
-            fab_instr.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Intent intent = new Intent(getApplicationContext(), LeaderboardActivity.class);
-                    pwindo.dismiss();
-                    startActivity(intent);
-
-                }
-            });
-
-            FloatingActionButton fab_stats = (FloatingActionButton) layout.findViewById(R.id.fab_stats);
-            fab_stats.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-
-                    Intent intent = new Intent(getApplicationContext(),  StatisticsActivity.class);
-                    pwindo.dismiss();
-                    startActivity(intent);
-
-
-                }
-            });
-
-            FloatingActionButton fab_usr = (FloatingActionButton) layout.findViewById(R.id.fab_challenges);
-            fab_usr.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Intent intent = new Intent(getApplicationContext(), ChallengesActivity.class);
-                    pwindo.dismiss();
-                    startActivity(intent);
-                }
-            });
 
 
         } catch (Exception e) {
