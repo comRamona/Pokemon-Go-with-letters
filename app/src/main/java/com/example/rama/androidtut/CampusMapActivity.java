@@ -811,7 +811,6 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
 
                     String name="marker_green"+e.getDescription();
                     int id = getResources().getIdentifier(name.toLowerCase(), "drawable", getPackageName());
-                    System.out.println(id);
                     mMap.addMarker(new MarkerOptions().position(new LatLng(e.getLat(), e.getLng())).title(e.getDescription()).visible(true).icon(BitmapDescriptorFactory.fromResource(id)));
                     //save markers for latter use
 

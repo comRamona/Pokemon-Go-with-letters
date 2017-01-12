@@ -172,6 +172,7 @@ public class WordArenaActivity extends AppCompatActivity {
         challengeManager=ChallengeManager.getInstance();
         installListener();
 
+
     }
 
 
@@ -263,6 +264,23 @@ public class WordArenaActivity extends AppCompatActivity {
     }
 
     public void refreshScreen(View view){
+        LayoutInflater inflater = (LayoutInflater) this
+                .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        View layout = inflater.inflate(R.layout.popup_word,
+                (ViewGroup) findViewById(R.id.show_word));
+        pwindo = new PopupWindow(layout, 800, 800, true);
+        pwindo.showAtLocation(layout, Gravity.CENTER, 0, 0);
+        pwindo.setBackgroundDrawable(new ColorDrawable());
+        FloatingActionButton fab_close = (FloatingActionButton) layout.findViewById(R.id.welldone_cancel);
+        fab_close.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                pwindo.dismiss();
+
+            }
+        });
+        TextView textView=(TextView) layout.findViewById(R.id.tvcheckWord);
+        textView.setText("Congrats!Yu have discovere a new word! \n SEVENTY");
         ltrAdapt.reset(letterCounts);
         for(int i=0;i<7;i++)
             charViews[i].setText("");

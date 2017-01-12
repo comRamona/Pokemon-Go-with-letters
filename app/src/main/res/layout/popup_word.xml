@@ -13,10 +13,18 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:weightSum="1"
+        android:padding="5dp"
         android:layout_weight="0.47">
 
 
 
+        <ImageView
+            android:src="@drawable/trophy"
+            android:layout_width="match_parent"
+            android:layout_height="64dp"
+            android:scaleType="center"
+            android:background="#FFFFBB33"
+            android:contentDescription="@string/app_name" />
 
         <ImageView
             android:id="@+id/icon"
@@ -34,7 +42,8 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:id="@+id/tvcheckWord"
-            android:text="Congrats!2
+            android:padding="5dp"
+            android:text="Congrats!
             "
             android:textAppearance="@style/TextAppearance.AppCompat.Display3" />
 

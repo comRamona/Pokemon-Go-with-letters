@@ -28,22 +28,22 @@
 
 
         <TextView
-            android:text="Collect letters from all over the campus."
+            android:text="Collect letters from all over the campus by going close to a letter and licking on it."
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:id="@+id/textView2"
             android:textAppearance="@style/TextAppearance.AppCompat.Display1"
-            android:textSize="12sp"
+            android:textSize="16sp"
             android:layout_weight="0.32" />
         <TextView
-            android:text="Form 7 letter words with your collected letters.."
+            android:text="Form 7 letter words with your collected letters. Click the (...) options  menu to access your Challenges, Leaderboard, Statistics and Word Arena. You can create new words in Word Arena, with the letters you have collecte. If yu get stucks, simply input at least 3 letters and press Hint. You get more hints by completing challenges."
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:id="@+id/textView3"
             android:textAppearance="@style/TextAppearance.AppCompat.Display1"
-            android:textSize="12sp"
+            android:textSize="16sp"
             android:layout_weight="0.29" />
 
         <android.support.design.widget.FloatingActionButton

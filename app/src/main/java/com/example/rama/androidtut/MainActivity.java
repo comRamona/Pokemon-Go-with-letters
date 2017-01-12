@@ -29,14 +29,17 @@ import com.google.firebase.database.FirebaseDatabase;
 
 
 /**
- * Start screen that launches when user initialized the app. If the user has never registered, it will display a sign up form.
+ * Start screen that launches when user initialized the app. If the user has never registered, it
+ * will display a sign up form.
  * The user can either launch a help screen or start the game, which will take him to the campus map.
+ * Snippets of code from the official Firebase examples where use for performing signup actions.
+ * (https://github.com/firebase/quickstart-android/tree/master/auth)
  */
 
 public class MainActivity extends BaseActivity implements
         View.OnClickListener {
 
-        private static final String TAG = "EmailPassword";
+        private static final String TAG = "MainActivity";
 
         private TextView mStatusTextView;
         private EditText mEmailField;
@@ -44,7 +47,7 @@ public class MainActivity extends BaseActivity implements
         private PopupWindow pwindo;
 
 
-        // declare_auth]
+        // declare_auth
         private FirebaseAuth mAuth;
 
         // declare_auth_listener]
@@ -53,7 +56,7 @@ public class MainActivity extends BaseActivity implements
         @Override
         public void onCreate(Bundle savedInstanceState) {
                 super.onCreate(savedInstanceState);
-                setContentView(R.layout.activity_login);
+                setContentView(R.layout.activity_main);
 
                 // Views
                 mStatusTextView = (TextView) findViewById(R.id.status);
@@ -130,7 +133,6 @@ public class MainActivity extends BaseActivity implements
         }
 
 
-// [END on_start_add_listener]
 
         // [START on_stop_remove_listener]
         @Override
@@ -277,6 +279,7 @@ public class MainActivity extends BaseActivity implements
 
     /**
      * Method initialize database holding default values for new user
+     * Initializes Gameplay, Statistics and Scores databases and populates them with defaut values
      */
     public void newUserDatabaseCreation(){
 
@@ -295,9 +298,8 @@ public class MainActivity extends BaseActivity implements
             gamePlayDb.child("lastDownload").setValue("");
             ListItem listItem =new ListItem(user.getEmail(),0);
             database.child("Scores").child(user.getUid()).setValue(listItem);
-//        database.child("Scores").child(user.getUid()).child("email").setValue(user.getEmail());
-//            database.child("Scores").child(user.getUid()).child("score").setValue(0);
             DatabaseReference challengesDb=database.child("Challenges").child(user.getUid());
+
             database.child("Statistics").child(user.getUid()).child("NumberOfWords").setValue(0);
             database.child("Statistics").child(user.getUid()).child("NumberOfHints").setValue(0);
             database.child("Statistics").child(user.getUid()).child("NumberOfLetters").setValue(0);
