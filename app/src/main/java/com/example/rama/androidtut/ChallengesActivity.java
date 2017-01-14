@@ -38,7 +38,6 @@ public class ChallengesActivity extends AppCompatActivity {
     private FirebaseAuth firebaseAuth;
     private FirebaseUser user;
     private DatabaseReference scoreDb;
-    private ValueEventListener valueEventListener;
     private Query queryRef;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,7 +58,7 @@ public class ChallengesActivity extends AppCompatActivity {
         scoreDb=database.child("Challenges").child(user.getUid()).getRef();
         queryRef = scoreDb.orderByChild("completed").limitToLast(100);
 
-        queryRef.addValueEventListener(valueEventListener=new ValueEventListener() {
+        queryRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
 
@@ -89,7 +88,6 @@ public class ChallengesActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
-        queryRef.removeEventListener(valueEventListener);
 
     }
 }

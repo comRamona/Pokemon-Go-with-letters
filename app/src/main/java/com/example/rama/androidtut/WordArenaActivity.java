@@ -57,6 +57,7 @@ public class WordArenaActivity extends AppCompatActivity {
     private TextView[] charViews;
     //submit button
     private Button submitButton;
+    private Button hintButton;
     //pop window when pressing submit
     private PopupWindow pwindo;
     //letter adapter for displaying letter inventory
@@ -80,6 +81,10 @@ public class WordArenaActivity extends AppCompatActivity {
     private BroadcastReceiver internetBroadcastReceiver;
     int chosen=0;
 
+    DatabaseReference gamePlayDb;
+    private ValueEventListener scoreEventLinstener;
+    private ValueEventListener hintsEventListener;
+
     /**
      * Get view and database connections
      * @param savedInstanceState
@@ -91,7 +96,7 @@ public class WordArenaActivity extends AppCompatActivity {
 
         //get view resources and initialize variables
         submitButton = (Button) findViewById(R.id.yes);
-        final Button hintButton=(Button) findViewById(R.id.hints);
+        hintButton=(Button) findViewById(R.id.hints);
         LinearLayout wordLayout = (LinearLayout) findViewById(R.id.word);
         GridView letters = (GridView) findViewById(R.id.letters);
 
@@ -120,62 +125,19 @@ public class WordArenaActivity extends AppCompatActivity {
         FirebaseUser user = firebaseAuth.getCurrentUser();
         loadDictionary();
         scoreDb= database.child("Scores").child(user.getUid()).getRef();
-        scoreDb.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                score=(int) dataSnapshot.getValue(Score.class).getScore();
-            }
 
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-                Log.e(TAG,databaseError.getMessage());
-            }
-        });
 
         hintsDb=database.child("Statistics").child(user.getUid()).child("NumberOfHints").getRef();
 
-                hintsDb.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                noHints=dataSnapshot.getValue(Integer.class);
-                String s="Hints: "+noHints;
-                hintButton.setText(s);
-            }
 
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
 
-            }
-        });
-
-        DatabaseReference gamePlayDb = database.child("GamePlay").child(user.getUid());
+        gamePlayDb = database.child("GamePlay").child(user.getUid());
         letterCounts=new int[26];
         temporaryCount=new int[26];
         letterRefs=new DatabaseReference[26];
-        for(int i=0;i<26;i++){
-            final int j=i;
-            String letter = (char) (i + 'A') + "";
-            letterRefs[i]= gamePlayDb.child("Letters").child(letter).getRef();
-
-            letterRefs[i].addValueEventListener(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    letterCounts[j]= dataSnapshot.getValue(Integer.class);
-                    temporaryCount[j]=letterCounts[j];
-                    ltrAdapt.updateCount(j,letterCounts[j]);
-                    ltrAdapt.notifyDataSetChanged();
-
-                }
-
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
-                    Log.e(TAG,databaseError.getMessage());
-                }
-            });}
 
         challengeManager=ChallengeManager.getInstance();
-        installListener();
+
 
 
     }
@@ -236,7 +198,10 @@ public class WordArenaActivity extends AppCompatActivity {
     protected void onPause() {
 
         super.onPause();
+        scoreDb.removeEventListener(scoreEventLinstener);
+        hintsDb.removeEventListener(hintsEventListener);
 
+        unregisterReceiver(internetBroadcastReceiver);
         Log.i(TAG, "Paused");
 
     }
@@ -248,6 +213,55 @@ public class WordArenaActivity extends AppCompatActivity {
         super.onResume();
 
         Log.i(TAG, "Resumed");
+        for(int i=0;i<26;i++){
+            final int j=i;
+            String letter = (char) (i + 'A') + "";
+            letterRefs[i]= gamePlayDb.child("Letters").child(letter).getRef();
+
+            letterRefs[i].addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    letterCounts[j]= dataSnapshot.getValue(Integer.class);
+                    temporaryCount[j]=letterCounts[j];
+                    ltrAdapt.updateCount(j,letterCounts[j]);
+                    ltrAdapt.notifyDataSetChanged();
+
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+                    Log.e(TAG,databaseError.getMessage());
+                }
+            });}
+
+        scoreDb.addValueEventListener(scoreEventLinstener=new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                score=(int) dataSnapshot.getValue(Score.class).getScore();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+                Log.e(TAG,databaseError.getMessage());
+            }
+        });
+
+        hintsDb.addValueEventListener(hintsEventListener=new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                noHints=dataSnapshot.getValue(Integer.class);
+                String s="Hints: "+noHints;
+                hintButton.setText(s);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+        installInternetListener();
 
     }
 
@@ -339,6 +353,7 @@ public class WordArenaActivity extends AppCompatActivity {
             int pos=word.charAt(i)-'A';
             int t=temporaryCount[pos];
             letterRefs[pos].setValue(t);
+            letterCounts[pos]=t;
         }
     }
 
@@ -401,7 +416,7 @@ public class WordArenaActivity extends AppCompatActivity {
     }
 
 
-    private void installListener() {
+    private void installInternetListener() {
 
         if (internetBroadcastReceiver == null) {
 
@@ -433,9 +448,9 @@ public class WordArenaActivity extends AppCompatActivity {
                 }
             };
 
-            final IntentFilter intentFilter = new IntentFilter();
-            intentFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
-            registerReceiver(internetBroadcastReceiver, intentFilter);
         }
+        final IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
+        registerReceiver(internetBroadcastReceiver, intentFilter);
     }
 }

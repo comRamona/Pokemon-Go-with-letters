@@ -58,7 +58,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="5dp"
-                        android:text="Click the (...) options  menu to access your Challenges, Leaderboard, Statistics and Word Arena.  If yu get stuck, simply input at least 3 letters and press Hint. \nYou get more hints by completing challenges."></TextView>
+                        android:text="Click the (...) options  menu to access your Challenges, Leaderboard, Statistics and Word Arena.  If you get stuck, simply input at least 3 letters and press Hint. \nYou get more hints by completing challenges."></TextView>
                 </TableRow>
             </TableLayout>
 

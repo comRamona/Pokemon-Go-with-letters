@@ -120,7 +120,6 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
     private ChallengeManager challengeManager;
     private BroadcastReceiver broadcastReceiver;
 
-    private boolean onCreateDone=false;
     private final SimpleDateFormat df = new SimpleDateFormat("dd-MMM-yyyy");
 
 
@@ -167,11 +166,12 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
         gamePlayDb=database.child("GamePlay").child(user.getUid()).getRef();
         letterCounts=new int[26];
         letterRefs=new DatabaseReference[26];
+
         for(int i=0;i<26;i++){
             final int j=i;
             String letter = (char) (i + 'A') + "";
             letterRefs[i]=gamePlayDb.child("Letters").child(letter).getRef();
-            letterRefs[i].addValueEventListener(new ValueEventListener() {
+            letterRefs[i].addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     letterCounts[j]= dataSnapshot.getValue(Integer.class);
@@ -189,16 +189,16 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 lastDownload=dataSnapshot.getValue(String.class);
-                downloadOrPopulateFromDatabase();
                 Calendar c = Calendar.getInstance();
-
                 try {
                     Date startDate=df.parse(lastDownload);
                     Date endDate=df.parse(currentDay);
                     c.setTime(endDate);
                     c.add(Calendar.DATE, -1);
+
                     if (c.getTime().equals(startDate)){
                         challengeManager.consecdays(getApplicationContext());
+
                     }
 
                 }catch(Exception e){
@@ -206,6 +206,7 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
                     Log.e(TAG,e.getMessage());
                 }
 
+                downloadOrPopulateFromDatabase();
             }
 
             @Override
@@ -215,9 +216,6 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
         });
 
         challengeManager=ChallengeManager.getInstance();
-        onCreateDone=true;
-        installListener();
-
 
     }
 
@@ -277,7 +275,7 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
 
     public void showOptionsDialog() {
         try {
-// We need to get the instance of the LayoutInflater
+        // We need to get the instance of the LayoutInflater
             LayoutInflater inflater = (LayoutInflater) this
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             View layout = inflater.inflate(R.layout.popup_win,
@@ -455,12 +453,9 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
            challengeManager.checkLetter(this);
            int i = title.charAt(0) - 'A';
            int oldVal = letterCounts[i];
-           letterRefs[i].setValue(oldVal + 1).addOnCompleteListener(new OnCompleteListener<Void>() {
-               @Override
-               public void onComplete(@NonNull Task<Void> task) {
-                   challengeManager.checkCounts(letterCounts,getApplicationContext());
-               }
-           });
+           letterRefs[i].setValue(oldVal + 1);
+           letterCounts[i]++;
+           challengeManager.checkCounts(letterCounts,getApplicationContext());
        }
         else {
            showDialog("Try again","Sorry, you are too far away from this letter!");
@@ -726,6 +721,8 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
         if (mGoogleApiClient.isConnected()) {
             checkLocationSettings();
         }
+        Log.i(TAG,"Resuming and installing listener");
+        installListener();
     }
 
     @Override
@@ -735,12 +732,15 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
         if (mGoogleApiClient.isConnected()) {
             stopLocationUpdates();
         }
+        unregisterReceiver(broadcastReceiver);
+        Log.i(TAG,"Unregistered internet receiver");
     }
 
     @Override
     protected void onStop() {
         super.onStop();
         mGoogleApiClient.disconnect();
+        Log.i(TAG,"Stopping");
 
     }
 
@@ -890,10 +890,11 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
                 }
             };
 
-            final IntentFilter intentFilter = new IntentFilter();
-            intentFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
-            registerReceiver(broadcastReceiver, intentFilter);
+
         }
+        final IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
+        registerReceiver(broadcastReceiver, intentFilter);
     }
 
     public void showDialog(String title,String message){

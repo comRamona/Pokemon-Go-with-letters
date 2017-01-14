@@ -308,9 +308,9 @@ public class MainActivity extends BaseActivity implements
             challengesDb.child("100letters").setValue(new Challenge("Collect 100 letters" ));
             challengesDb.child("1words").setValue(new Challenge("Discover one word" ));
             challengesDb.child("5words").setValue(new Challenge("Discover 5 words" ));
-            challengesDb.child("1eachletter").setValue(new Challenge("Collect at least one of each letter" ));
-            challengesDb.child("5eachletter").setValue(new Challenge("Collect at least 5 of each letter" ));
-            challengesDb.child("eachletterword").setValue(new Challenge("Discover a word starting witch each letter" ));
+            challengesDb.child("1eachletter").setValue(new Challenge("Collect at least one letter of each" ));
+            challengesDb.child("5eachletter").setValue(new Challenge("Collect at least 5 letters of each" ));
+            challengesDb.child("eachletterword").setValue(new Challenge("Words starting with each letter" ));
             challengesDb.child("score2000").setValue(new Challenge("Score 2000 points" ));
 
     }

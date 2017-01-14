@@ -168,12 +168,16 @@ public class ChallengeManager {
     }
 
     public void consecdays(Context context){
+        Log.e(TAG,"Challenge completed hello");
+        Log.i(TAG,Boolean.toString(allChallenges.get("consecdays").isCompleted()));
         if(!allChallenges.get("consecdays").isCompleted()){
+            Log.e(TAG,"Challenge completed hello22");
             challengeDb.child("consecdays").child("completed").getRef().setValue(true);
             android.support.v7.app.AlertDialog alertDialog = getAlertDialog(context);
             alertDialog.setMessage("You have played the game on consecutive days! \n" +
                     "Here are 2 bonus hints for you!");
             alertDialog.show();
+            Toast.makeText(context, "Should show sth", Toast.LENGTH_SHORT).show();
             changeNumberOfHints(2);
         }
     }

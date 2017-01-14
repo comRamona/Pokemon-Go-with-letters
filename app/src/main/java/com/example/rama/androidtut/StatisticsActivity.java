@@ -37,7 +37,6 @@ public class StatisticsActivity extends AppCompatActivity {
     private FirebaseAuth firebaseAuth;
     private FirebaseUser user;
     private DatabaseReference scoreDb;
-    private ValueEventListener valueEventListener;
     private Query queryRef;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,7 +55,7 @@ public class StatisticsActivity extends AppCompatActivity {
         scoreDb=database.child("Statistics").child(user.getUid()).child("AllWords").getRef();
         queryRef = scoreDb.orderByValue().limitToLast(100);
 
-        queryRef.addValueEventListener(valueEventListener=new ValueEventListener() {
+        queryRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
 
@@ -83,7 +82,6 @@ public class StatisticsActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
-        queryRef.removeEventListener(valueEventListener);
 
     }
 }
