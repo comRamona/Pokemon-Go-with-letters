@@ -1,7 +1,8 @@
 package com.example.rama.grabble.UtilityClasses;
 
 /**
- * Challenges to be stored in the database, containing a description and complete status
+ * Challenges to be completed by users, containing a description and complete status
+ * Can be stored directly in nosql database.
  */
 
 public class Challenge {

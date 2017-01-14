@@ -16,7 +16,7 @@ import static org.junit.Assert.assertTrue;
  * the implementation of Trie
  */
 
-public class TrieTest {
+public class TrieUnitTest {
     private Trie trie;
     @Before
     public void initialize(){

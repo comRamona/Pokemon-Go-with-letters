@@ -1,9 +1,0 @@
-<ListView android:id="@+id/toplist"
-    android:layout_width="fill_parent"
-    android:layout_height="wrap_content"
-    android:paddingBottom="5dp"
-    android:clipToPadding="false"
-    android:dividerHeight="1dp"
-    android:cacheColorHint="#FFFFFF"
-    android:layout_marginTop="56dp"
-    xmlns:android="http://schemas.android.com/apk/res/android" />

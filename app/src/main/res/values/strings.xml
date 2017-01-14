@@ -1,95 +1,20 @@
 <resources>
-    <string name="edit_message">Enter a message</string>
-    <string name="button_send">Send</string>
     <string name="button_start">Start</string>
-    <string name="button_load">Load</string>
     <string name="title_activity_campus_map">CampusMap</string>
-    <string name="preference_file_letters">myletters</string>
-    <string name="password_hint">Password</string>
-    <string name="email_hint">Email</string>
-    <string name="sign_up_button_label">Sign Up</string>
-    <string name="signup_error_message">Please make sure you enter an email address and password!</string>
-    <string name="signup_error_title">Error!</string>
-    <string name="signup_success">Account successfully created! You can now Login.</string>
-    <string name="login_error_message">Please make sure you enter an email address and password!</string>
-    <string name="login_error_title">Error!</string>
-    <string name="login_button_label">Login</string>
-    <string name="sign_up_text">Sign Up!</string>
-    <string name="title_activity_login">Sign in</string>
-    <string name="add_item">Add New Item</string>
-    <string name="action_logout">Logout</string>
 
     <!-- Strings related to login -->
-    <string name="prompt_email">Email</string>
-    <string name="prompt_password">Password (optional)</string>
-    <string name="action_sign_in">Sign in or register</string>
-    <string name="action_sign_in_short">Sign in</string>
-    <string name="error_invalid_email">This email address is invalid</string>
-    <string name="error_invalid_password">This password is too short</string>
-    <string name="error_incorrect_password">This password is incorrect</string>
-    <string name="error_field_required">This field is required</string>
-    <string name="permission_rationale">"Contacts permissions are needed for providing email
-        completions."
-    </string>
-    <string name="app_name">Grabble</string>
 
-    <string name="label_google_sign_in">Firebase + Google Sign In</string>
-    <string name="desc_google_sign_in">Use a Google Sign In credential to authenticate with Firebase.</string>
-
-    <string name="label_facebook_login">Firebase + Facebook Login</string>
-    <string name="desc_facebook_login">Use a Facebook Login credential to authenticate with Firebase.</string>
-
-    <string name="label_twitter_login">Firebase + Twitter Login</string>
-    <string name="desc_twitter_login">Use a Twitter Login credential to authenticate with Firebase.</string>
-
-    <string name="label_emailpassword">Email/Password Authentication</string>
-    <string name="desc_emailpassword">Use an email and password to authenticate with Firebase.</string>
-
-    <string name="label_anonymous_auth">Anonymous Authentication</string>
-    <string name="desc_anonymous_auth">Sign in anonymously and then later upgrade to a full Firebase Auth user.</string>
-
-    <string name="label_custom_auth">Custom Authentication</string>
-    <string name="desc_custom_auth">Use a custom token signed by your own server to authenticate with Firebase.</string>
-
-    <string name="label_firebase_ui">FirebaseUI Auth</string>
-    <string name="desc_firebase_ui">Use the FirebaseUI-Android library to authenticate with Firebase.</string>
-
-    <string name="hint_user_id">User ID</string>
-    <string name="get_custom_token">Get Token</string>
     <string name="sign_in">Sign In</string>
     <string name="create_account">Create Account</string>
     <string name="sign_out">Sign Out</string>
-    <string name="disconnect">Disconnect</string>
     <string name="loading">Loading…</string>
-    <string name="custom_token">Custom Token</string>
     <string name="signed_out">Signed Out</string>
-    <string name="token_null">Token: null</string>
     <string name="hint_email">Email</string>
     <string name="hint_password">Password</string>
     <string name="desc_firebase_lockup">Firebase logo and name</string>
     <string name="auth_failed">Authentication failed</string>
 
-    <string name="firebase_status_fmt">Firebase User: %s</string>
-    <string name="firebase_user_management">Firebase User Management</string>
-
-    <string name="google_status_fmt">Google User: %s</string>
-    <string name="google_title_text">Google Sign In</string>
-
-    <string name="facebook_status_fmt">Facebook User: %s</string>
-    <string name="facebook_title_text">Facebook Login</string>
-
     <string name="emailpassword_status_fmt">Email User: %s</string>
-    <string name="emailpassword_title_text">Email and Password</string>
-
-    <string name="twitter_status_fmt">Twitter User: %s</string>
-    <string name="twitter_title_text">Twitter Login</string>
-
-    <string name="firebaseui_status_fmt">Firebase User: %s</string>
-    <string name="firebaseui_title_text">FirebaseUI Auth</string>
-
-    <string name="id_fmt">User ID: %s</string>
-    <string name="email_fmt">Email: %s</string>
-    <string name="thekey">11066006354-cfkh8iiid6cep4i6eb83q6eaf1t32a8u.apps.googleusercontent.com</string>
 
     <string name="lettersurl">http://www.inf.ed.ac.uk/teaching/courses/selp/coursework/</string>"
 </resources>

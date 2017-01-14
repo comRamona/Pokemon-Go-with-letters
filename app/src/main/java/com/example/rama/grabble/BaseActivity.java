@@ -4,6 +4,9 @@ import android.app.ProgressDialog;
 import android.support.annotation.VisibleForTesting;
 import android.support.v7.app.AppCompatActivity;
 
+/**
+ * Base activity providing a progress dialog
+ */
 public class BaseActivity extends AppCompatActivity {
 
     @VisibleForTesting

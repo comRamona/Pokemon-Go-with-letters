@@ -1,7 +1,7 @@
 package com.example.rama.grabble.UtilityClasses;
 
 /**
- * Created by Ramona on 02/01/2017.
+ * ListItem class for anay items with 2 fields that can be displayed in a table.
  */
 
 

@@ -48,7 +48,10 @@ public class StatisticsActivity extends AppCompatActivity {
         FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
         FirebaseUser user = firebaseAuth.getCurrentUser();
         DatabaseReference scoreDb = database.child("Statistics").child(user.getUid()).child("AllWords").getRef();
-        Query queryRef = scoreDb.orderByValue().limitToLast(100);
+        /**
+         * Get all words created by user and display them
+         */
+        Query queryRef = scoreDb.orderByValue();
 
         queryRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override

@@ -19,6 +19,7 @@ import java.util.HashMap;
 /**
  * ChallengeManager gets alerted each time a new word is created or a new letter is collected,
  * checking and updating the challenge database and awarding bonus hints.
+ * It is a singleton object, shared by all the activities in the game.
  */
 
 public class ChallengeManager {

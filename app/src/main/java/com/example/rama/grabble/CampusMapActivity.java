@@ -86,23 +86,45 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
      * Constant used in the location settings dialog.
      */
     protected static final int REQUEST_CHECK_SETTINGS = 0x1;
-    /**
-     * ATTENTION: This was auto-generated to implement the App Indexing API.
-     * See https://g.co/AppIndexing/AndroidStudio for more information.
-     */
 
+    /**
+     * Maximum distance from a marker for it to be collectable
+     */
+    protected static final int DISTANCE_THRESHOLD = 25;
+
+    /**
+     * Default Edinburgh location
+     */
     protected static final LatLng DEFAULT_EDINBURGH_LATLNG = new LatLng(55.946233, -3.192473);
+    /**
+     * Date format for storing date of marker download, so that new markers are only downloaded
+     * on a new day
+     */
     private final SimpleDateFormat df = new SimpleDateFormat("dd-MMM-yyyy");
+    /**
+     * Get current date
+     */
     String currentDay;
+    /**
+     * Store last download
+     */
     String lastDownload;
+    /**
+     * Array of counts for all letters collected by player
+     */
     private int[] letterCounts;
+    /**
+     * Google and gps specific objects
+     */
     private GoogleMap mMap;
     private GoogleApiClient mGoogleApiClient;
     private Location mCurrentLocation;
     private LocationRequest mLocationRequest;
     private LocationSettingsRequest mLocationSettingsRequest;
+
     private boolean markers_loaded = false;
     private PopupWindow pwindo;
+    // [[ Start of Firebase specific objects
     private FirebaseAuth mAuth;
     private DatabaseReference database;
     private DatabaseReference markersDb;
@@ -110,10 +132,24 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
     private DatabaseReference[] letterRefs;
     private DatabaseReference lastUpdatedRef;
     private FirebaseUser user;
+    // ]] end of Firebase specific objects
+    // ChallengeManager that is called every time a new event happens (letter collection)
     private ChallengeManager challengeManager;
+    /**
+     * Broadcast receiver for monitoring internet connection, needed for saving game state
+     */
     private BroadcastReceiver broadcastReceiver;
+    /**
+     * Application context
+     */
     private Context context;
 
+    /**
+     * Obtain database connections and manage Google API and location updates.
+     * If all requirements are met, markers are loaded on the map.
+     *
+     * @param savedInstanceState saved instance state
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -141,13 +177,9 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
 
 
         Calendar c = Calendar.getInstance();
-
-
         currentDay = df.format(c.getTime());
 
         mAuth = FirebaseAuth.getInstance();
-        // [END initialize_auth]
-
 
         database = FirebaseDatabase.getInstance().getReference();
 
@@ -176,6 +208,7 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
             });
         }
 
+        //determine whether user has played the game on consecutive game (challenge)
         lastUpdatedRef = gamePlayDb.child("lastDownload").getRef();
         lastUpdatedRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -187,7 +220,6 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
                     Date endDate = df.parse(currentDay);
                     c.setTime(endDate);
                     c.add(Calendar.DATE, -1);
-
                     if (c.getTime().equals(startDate)) {
                         challengeManager.consecdays(context);
 
@@ -198,7 +230,9 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
                     Log.e(TAG, e.getMessage());
                 }
 
+                // [[ Get markers for the day
                 downloadOrPopulateFromDatabase();
+                // ]] End of get markers
             }
 
             @Override
@@ -212,6 +246,9 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
     }
 
 
+    /**
+     * Connect Google API client and start checking location settings.
+     */
     @Override
     protected void onStart() {
         super.onStart();
@@ -251,6 +288,9 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
         Log.i(TAG, "Unregistered internet receiver");
     }
 
+    /**
+     * Disconnect Google API client
+     */
     @Override
     protected void onStop() {
         super.onStop();
@@ -268,32 +308,6 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
         super.onSaveInstanceState(savedInstanceState);
         Log.i(TAG, "Saving the state");
         savedInstanceState.putParcelable(LOCATION_KEY, mCurrentLocation);
-
-    }
-
-
-    private void collectOldMarkers(Map<String, Object> mymarkers) {
-
-        if (mymarkers == null) {
-
-            Log.i(TAG, "No stored markers. Downloading");
-            loadMarkersFromWebsite();
-            return;
-        }
-
-        for (Map.Entry<String, Object> entry : mymarkers.entrySet()) {
-
-            //Get user map
-            Map singleUser = (Map) entry.getValue();
-
-            String name = "marker_green" + singleUser.get("name");
-            int id = getResources().getIdentifier(name.toLowerCase(), "drawable", getPackageName());
-            LatLng latLng = new LatLng((double) singleUser.get("lat"), (double) singleUser.get("lng"));
-            mMap.addMarker(new MarkerOptions().position(latLng).title((String) singleUser.get("name")).icon(BitmapDescriptorFactory.fromResource(id)));
-
-        }
-
-        Log.i(TAG, "Numer of Markers: " + mymarkers.size());
 
     }
 
@@ -319,6 +333,9 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
     }
 
 
+    /**
+     * Build google api client
+     */
     protected synchronized void buildGoogleApiClient() {
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addConnectionCallbacks(this)
@@ -329,6 +346,9 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
 
     }
 
+    /**
+     * Create location request
+     */
     protected void createLocationRequest() {
         mLocationRequest = new LocationRequest();
 
@@ -347,6 +367,9 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
 
     }
 
+    /**
+     * Build location settings request
+     */
     protected void buildLocationSettingsRequest() {
         LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder();
         builder.addLocationRequest(mLocationRequest);
@@ -413,7 +436,9 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
     }
 
     /**
-     * Start populating the map with today's letter markers
+     * Start populating the map with today's letter markers, deciding whether they have already
+     * been downloaded and need to be retrieved from database or whether it is the first time
+     * playing the game for the day and new markers should be downloaded.
      */
     public void downloadOrPopulateFromDatabase() {
         if (!currentDay.equals(lastDownload)) {
@@ -434,8 +459,9 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
 
     }
 
+
     /**
-     * Function to determine what happends when users clicks on a marker.
+     * Function to define behaviour when users clicks on a marker.
      * Checks distance and if it is within threshold, update user's inventory with new letter.
      *
      * @param marker Marker the user clicked on
@@ -451,7 +477,7 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
         Location.distanceBetween(lastLocation.getLatitude(), lastLocation.getLongitude(),
                 position.latitude, position.longitude, results);
         Log.i(TAG, "Distance from marker is " + results[0]);
-        if (results[0] <= 25) {
+        if (results[0] <= DISTANCE_THRESHOLD) {
             //replace ! with . since database doesn't allow certain characters in keys
             showDialog("Congratulations!", "You have collected letter " + marker.getTitle() + "!");
             String key = (marker.getPosition().latitude + "!" + marker.getPosition().longitude).replaceAll("\\.", ",");
@@ -495,6 +521,36 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
 
     }
 
+    /**
+     * Display markers retrieved from database
+     *
+     * @param mymarkers retrieved markers
+     */
+    private void collectOldMarkers(Map<String, Object> mymarkers) {
+
+        if (mymarkers == null) {
+
+            Log.i(TAG, "No stored markers. Downloading");
+            loadMarkersFromWebsite();
+            return;
+        }
+
+        for (Map.Entry<String, Object> entry : mymarkers.entrySet()) {
+
+            //Get user map
+            Map singleUser = (Map) entry.getValue();
+
+            String name = "marker_green" + singleUser.get("name");
+            int id = getResources().getIdentifier(name.toLowerCase(), "drawable", getPackageName());
+            LatLng latLng = new LatLng((double) singleUser.get("lat"), (double) singleUser.get("lng"));
+            mMap.addMarker(new MarkerOptions().position(latLng).title((String) singleUser.get("name")).icon(BitmapDescriptorFactory.fromResource(id)));
+
+        }
+
+        Log.i(TAG, "Numer of Markers: " + mymarkers.size());
+
+    }
+
     @Override
     public void onConnected(@Nullable Bundle bundle) {
         if (mCurrentLocation == null) {
@@ -524,7 +580,7 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
     /**
      * Change map focus depending on current location
      *
-     * @param location
+     * @param location current location
      */
     @Override
     public void onLocationChanged(Location location) {
@@ -663,19 +719,6 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
 
     }
 
-
-//    //On pressing back, return to sign up screen
-//    @Override
-//    public boolean onKeyDown(int keyCode, KeyEvent event)  {
-//        if (keyCode == KeyEvent.KEYCODE_BACK ) {
-//            Intent intent = new Intent(this, MainActivity.class);
-//            startActivity(intent);
-//            return true;
-//        }
-//
-//        return super.onKeyDown(keyCode, event);
-//    }
-
     /**
      * Install listener to get internet connection state
      */
@@ -690,7 +733,7 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
 
                     Bundle extras = intent.getExtras();
 
-                    NetworkInfo info = (NetworkInfo) extras
+                    NetworkInfo info = extras
                             .getParcelable("networkInfo");
 
                     NetworkInfo.State state = info.getState();
@@ -780,16 +823,16 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
     /**
      * Pop up cancel button
      *
-     * @param view
+     * @param view button
      */
     public void fab_cancel(View view) {
         pwindo.dismiss();
     }
 
     /**
-     * Word arena button
+     * Button to launch Word arena
      *
-     * @param view
+     * @param view button
      */
     public void fab_new(View view) {
         Toast.makeText(CampusMapActivity.this, "Saving your data..", Toast.LENGTH_SHORT).show();
@@ -799,9 +842,9 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
     }
 
     /**
-     * Leaderboard activity button
+     * Button to launch Leaderboard activity
      *
-     * @param view
+     * @param view button
      */
     public void fab_leaderboard(View view) {
         Intent intent = new Intent(this, LeaderboardActivity.class);
@@ -810,9 +853,9 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
     }
 
     /**
-     * Statistics activity button
+     * Button to launch Statistics activity
      *
-     * @param view
+     * @param view button
      */
     public void fab_stats(View view) {
         Intent intent = new Intent(this, StatisticsActivity.class);
@@ -822,9 +865,9 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
     }
 
     /**
-     * Challenge Activity button
+     * Button to launch Challenges Activity
      *
-     * @param view
+     * @param view button
      */
     public void fab_challenges(View view) {
         Intent intent = new Intent(this, ChallengesActivity.class);

@@ -2,7 +2,6 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:id="@+id/header_footer"
     android:layout_height="match_parent"
     xmlns:ads="http://schemas.android.com/apk/res-auto">
     <RelativeLayout
@@ -14,7 +13,6 @@
         android:gravity="center"
         android:layout_gravity="center">
         <TextView
-            android:id="@+id/header_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="#FFFFFF"
@@ -31,7 +29,6 @@
         android:gravity="center"
         android:layout_gravity="center">
         <TextView
-            android:id="@+id/footer_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="#FFFFFF"
@@ -39,14 +36,12 @@
             android:textSize="25sp"/>
     </RelativeLayout>
     <ScrollView
-        android:id="@+id/scroll_view"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:layout_above="@+id/footer"
         android:layout_below="@+id/header"
         android:fillViewport="true">
         <LinearLayout
-            android:id="@+id/myLayout"
             android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

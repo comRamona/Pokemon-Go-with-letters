@@ -137,6 +137,11 @@ public class MainActivity extends BaseActivity implements
         }
     }
 
+    /**
+     * Create new user account
+     * @param email email
+     * @param password password
+     */
     private void createAccount(String email, String password) {
         Log.d(TAG, "createAccount:" + email);
         if (!validateForm()) {
@@ -171,6 +176,11 @@ public class MainActivity extends BaseActivity implements
         // [END create_user_with_email]
     }
 
+    /**
+     * Sign is user
+     * @param email email
+     * @param password password
+     */
     private void signIn(String email, String password) {
         Log.d(TAG, "signIn:" + email);
         if (!validateForm()) {
@@ -206,11 +216,18 @@ public class MainActivity extends BaseActivity implements
         // [END sign_in_with_email]
     }
 
+    /**
+     * Sign our user
+     */
     private void signOut() {
         mAuth.signOut();
         updateUI(null);
     }
 
+    /**
+     * Validate user's input
+     * @return valid input
+     */
     private boolean validateForm() {
         boolean valid = true;
 
@@ -243,6 +260,10 @@ public class MainActivity extends BaseActivity implements
         return valid;
     }
 
+    /**
+     * Manage visible buttons
+     * @param user current user
+     */
     private void updateUI(FirebaseUser user) {
         hideProgressDialog();
         if (user != null) {
@@ -271,7 +292,7 @@ public class MainActivity extends BaseActivity implements
         } else if (i == R.id.email_sign_in_button) {
             signIn(mEmailField.getText().toString(), mPasswordField.getText().toString());
         } else if (i == R.id.start_game_button) {
-            //finish();
+            //start new activity
             Intent intent = new Intent(getApplicationContext(), CampusMapActivity.class);
             startActivity(intent);
         } else if (i == R.id.sign_out_button) {
@@ -281,7 +302,7 @@ public class MainActivity extends BaseActivity implements
 
     /**
      * Method initialize database holding default values for new user
-     * Initializes Gameplay, Statistics and Scores databases and populates them with defaut values
+     * Initializes Gameplay, Statistics and Scores databases and populates them with default values
      */
     public void newUserDatabaseCreation() {
 

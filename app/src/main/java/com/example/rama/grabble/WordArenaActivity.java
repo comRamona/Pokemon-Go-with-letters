@@ -45,6 +45,10 @@ import java.util.Map;
 import java.util.Scanner;
 
 
+/**
+ * Activity for word creation. UI displays all collected letters and allows creation of
+ * 7 letter words using available letters.
+ */
 public class WordArenaActivity extends AppCompatActivity {
 
     static String TAG = "WordArenaActivity";
@@ -68,8 +72,9 @@ public class WordArenaActivity extends AppCompatActivity {
     private DatabaseReference[] letterRefs;
     private DatabaseReference scoreDb;
     private DatabaseReference hintsDb;
-    //leter inventory counters
+    //leter inventory counters used for display
     private int[] temporaryCount;
+    //letter inventory counters used for actual database values
     private int[] letterCounts;
     //number of hints
     private int noHints;
@@ -80,6 +85,12 @@ public class WordArenaActivity extends AppCompatActivity {
     private ValueEventListener scoreEventLinstener;
     private ValueEventListener hintsEventListener;
 
+    /**
+     * Calculate score of a word based on the sum of the value of its letters
+     *
+     * @param word word
+     * @return score
+     */
     private static int calculateScore(String word) {
         int sc = 0;
         for (int i = 0; i < word.length(); i++) {
@@ -159,8 +170,12 @@ public class WordArenaActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * React to user pressing a letter by adding it to the current word being created
+     *
+     * @param view letter button
+     */
     public void letterPressed(View view) {
-
         if (chosen >= 7) return;
         //user has pressed a letter to guess
         String ltr = ((TextView) view).getText().toString();
@@ -187,26 +202,28 @@ public class WordArenaActivity extends AppCompatActivity {
     protected void onStop() {
 
         super.onStop();
-
         Log.i(TAG, "OnStop");
 
     }
 
+    /**
+     * Remove database event listeners
+     */
     @Override
     protected void onPause() {
-
         super.onPause();
         scoreDb.removeEventListener(scoreEventLinstener);
         hintsDb.removeEventListener(hintsEventListener);
         challengeManager.removeListeners();
         unregisterReceiver(internetBroadcastReceiver);
-
         Log.i(TAG, "Paused");
 
     }
 
+    /**
+     * Add database event listeners
+     */
     @Override
-
     protected void onResume() {
 
         super.onResume();
@@ -267,7 +284,6 @@ public class WordArenaActivity extends AppCompatActivity {
     }
 
     @Override
-
     protected void onDestroy() {
 
         super.onDestroy();
@@ -277,7 +293,6 @@ public class WordArenaActivity extends AppCompatActivity {
     }
 
     @Override
-
     protected void onStart() {
 
         super.onStart();
@@ -286,7 +301,10 @@ public class WordArenaActivity extends AppCompatActivity {
 
     }
 
-    //reset all counts
+    /**
+     * Reset current word
+     * @param view clear button
+     */
     public void refreshScreen(View view) {
         ltrAdapt.reset(letterCounts);
         for (int i = 0; i < 7; i++)
@@ -295,6 +313,11 @@ public class WordArenaActivity extends AppCompatActivity {
         System.arraycopy(letterCounts, 0, temporaryCount, 0, letterCounts.length);
     }
 
+    /**
+     * Check whether inputed word is present in the dictionary and trigger award events in
+     * a pop up window
+     * @param view submit button
+     */
     public void checkWord(View view) {
         LayoutInflater inflater = (LayoutInflater) this
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -331,6 +354,10 @@ public class WordArenaActivity extends AppCompatActivity {
 
     }
 
+    /**
+     *
+     * @return current input word
+     */
     private String getCurrentWord() {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < 7; i++)
@@ -338,6 +365,10 @@ public class WordArenaActivity extends AppCompatActivity {
         return sb.toString().toUpperCase();
     }
 
+    /**
+     * Update database values by substracting used letters
+     * @param word current input
+     */
     private void updateCounts(String word) {
         for (int i = 0; i < word.length(); i++) {
             int pos = word.charAt(i) - 'A';
@@ -347,12 +378,18 @@ public class WordArenaActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Complete current input word, provided at least 2 letters have been inputed.
+     * Check whether there is a completion with the available letters and display that as a hint,
+     * otherwise suggets a word that needs more letters to be collected.
+     * @param view hint button
+     */
     public void giveHint(View view) {
 
         if (noHints >= 1) {
             String prefix = getCurrentWord();
-            String message = "You need to input at least 3 letters to get a hint.";
-            if (prefix.length() >= 3) {
+            String message = "You need to input at least 2 letters to get a hint.";
+            if (prefix.length() >= 2) {
                 hintsDb.setValue(noHints - 1);
                 List<String> res = dictionary.getAllWordsStartingWith(prefix);
                 Log.w(TAG, prefix);
@@ -371,6 +408,12 @@ public class WordArenaActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Helper function for checking whether any of the suggested words can be formed with
+     * the letters the user has in inventory
+     * @param res result list of suggested words
+     * @return a suggested word or null
+     */
     private String checkMatch(List<String> res) {
         Map<Character, Integer> counter = new HashMap<>();
         for (String s : res) {
@@ -391,6 +434,10 @@ public class WordArenaActivity extends AppCompatActivity {
         return null;
     }
 
+    /**
+     * @param context application context
+     * @return basic alert dialog with ok button
+     */
     private android.support.v7.app.AlertDialog getAlertDialog(Context context) {
         android.support.v7.app.AlertDialog alertDialog = new android.support.v7.app.AlertDialog.Builder(context).create();
 
@@ -405,6 +452,9 @@ public class WordArenaActivity extends AppCompatActivity {
     }
 
 
+    /**
+     * Install internet listener
+     */
     private void installInternetListener() {
 
         if (internetBroadcastReceiver == null) {

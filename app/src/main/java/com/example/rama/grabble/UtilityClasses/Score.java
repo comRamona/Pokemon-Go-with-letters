@@ -1,7 +1,8 @@
 package com.example.rama.grabble.UtilityClasses;
 
 /**
- * Scores to be stored in the database, containing a name and complete status
+ * Scores and names of users.
+ * Can be stored directly in nosql database.
  */
 
 public class Score {
@@ -37,8 +38,5 @@ public class Score {
     public void setScore(int score) {
         this.score=score;
     }
-
-
-
 
 }

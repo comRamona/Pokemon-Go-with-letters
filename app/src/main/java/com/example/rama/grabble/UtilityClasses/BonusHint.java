@@ -1,7 +1,8 @@
 package com.example.rama.grabble.UtilityClasses;
 
 /**
- * Created by Ramona on 06/01/2017.
+ * BonusHint class, awared for completing a challenge.
+ * Can be stored directly in nosql database.
  */
 
 public class BonusHint {
