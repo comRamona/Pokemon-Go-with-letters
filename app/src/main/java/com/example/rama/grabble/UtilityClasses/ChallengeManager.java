@@ -1,9 +1,8 @@
-package com.example.rama.androidtut.UtilityClasses;
+package com.example.rama.grabble.UtilityClasses;
 
 import android.content.Context;
 import android.content.DialogInterface;
 import android.util.Log;
-import android.widget.Toast;
 
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -26,25 +25,35 @@ public class ChallengeManager {
     private static ChallengeManager challengeManager=new ChallengeManager();
     private DatabaseReference challengeDb;
     private DatabaseReference statisticsDb;
-    private FirebaseUser user;
     private DatabaseReference allWords;
     private int numberOfWords;
     private int numberOfHints;
     private int numberOfLetters;
+    private ValueEventListener numberOfWordsListener;
+    private ValueEventListener numberOfHintsListener;
+    private ValueEventListener numberOfLettersListener;
+    private DatabaseReference noWordsRef;
+    private DatabaseReference noHintsRef;
+    private DatabaseReference noLettersRef;
+    private DatabaseReference[] startRefs;
     private boolean[] startLetters;
     private HashMap<String,Challenge> allChallenges=new HashMap<>();
     private String TAG="ChallengeManager";
+    private FirebaseAuth firebaseAuth;
 
     private ChallengeManager(){
         DatabaseReference database = FirebaseDatabase.getInstance().getReference();
-        FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
-        user = firebaseAuth.getCurrentUser();
-        challengeDb= database.child("Challenges").child(user.getUid()).getRef();
-        statisticsDb= database.child("Statistics").child(user.getUid()).getRef();
+         firebaseAuth = FirebaseAuth.getInstance();
+
+        challengeDb= database.child("Challenges").child(getUid()).getRef();
+        statisticsDb= database.child("Statistics").child(getUid()).getRef();
         allWords=statisticsDb.child("AllWords").getRef();
 
         startLetters=new boolean[26];
-        DatabaseReference[] startRefs = new DatabaseReference[26];
+        noWordsRef=statisticsDb.child("NumberOfWords").getRef();
+        noHintsRef=statisticsDb.child("NumberOfHints").getRef();
+        noLettersRef=statisticsDb.child("NumberOfLetters").getRef();
+        startRefs = new DatabaseReference[26];
         for(int i=0;i<26;i++) {
             final int j = i;
             String letter = (char) (i + 'A') + "";
@@ -78,18 +87,31 @@ public class ChallengeManager {
             }
         });
 
-      statisticsDb.child("NumberOfWords").getRef().addValueEventListener(new ValueEventListener() {
-          @Override
-          public void onDataChange(DataSnapshot dataSnapshot) {
-              numberOfWords=dataSnapshot.getValue(Integer.class);
-          }
 
-          @Override
-          public void onCancelled(DatabaseError databaseError) {
-              Log.e(TAG,"Error updating db "+databaseError.getMessage());
-          }
-      });
-        statisticsDb.child("NumberOfHints").getRef().addValueEventListener(new ValueEventListener() {
+
+
+
+
+    }
+
+    private String getUid(){
+         FirebaseUser user = firebaseAuth.getCurrentUser();
+        String uid = user.getUid();
+        return uid;
+    }
+    public void initializeListeners(){
+        noWordsRef.addValueEventListener(numberOfWordsListener=new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                numberOfWords=dataSnapshot.getValue(Integer.class);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.e(TAG,"Error updating db "+databaseError.getMessage());
+            }
+        });
+        noHintsRef.addValueEventListener(numberOfHintsListener=new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 numberOfHints=dataSnapshot.getValue(Integer.class);
@@ -101,7 +123,7 @@ public class ChallengeManager {
             }
         });
 
-        statisticsDb.child("NumberOfLetters").getRef().addValueEventListener(new ValueEventListener() {
+        noLettersRef.addValueEventListener(numberOfLettersListener =new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 numberOfLetters=dataSnapshot.getValue(Integer.class);
@@ -112,12 +134,13 @@ public class ChallengeManager {
                 Log.e(TAG,"Error updating db "+databaseError.getMessage());
             }
         });
-
     }
-
-    public int getNumberOfHints(){
-        return numberOfHints;
+    public void removeListeners(){
+        noWordsRef.removeEventListener(numberOfWordsListener);
+        noHintsRef.removeEventListener(numberOfHintsListener);
+        noLettersRef.removeEventListener(numberOfLettersListener);
     }
+  
     private void changeNumberOfHints(int i){
         statisticsDb.child("NumberOfHints").getRef().setValue(numberOfHints+i);
     }
@@ -163,21 +186,20 @@ public class ChallengeManager {
                         " alphabet! That's impressive! Here are 2 bonus hints!");
                 alertDialog2.show();
             }
+            int i=word.charAt(0)-'A';
+            startRefs[i].setValue(true);
+
         }
 
     }
 
     public void consecdays(Context context){
-        Log.e(TAG,"Challenge completed hello");
         Log.i(TAG,Boolean.toString(allChallenges.get("consecdays").isCompleted()));
         if(!allChallenges.get("consecdays").isCompleted()){
-            Log.e(TAG,"Challenge completed hello22");
-            challengeDb.child("consecdays").child("completed").getRef().setValue(true);
             android.support.v7.app.AlertDialog alertDialog = getAlertDialog(context);
             alertDialog.setMessage("You have played the game on consecutive days! \n" +
                     "Here are 2 bonus hints for you!");
             alertDialog.show();
-            Toast.makeText(context, "Should show sth", Toast.LENGTH_SHORT).show();
             changeNumberOfHints(2);
         }
     }
@@ -214,8 +236,16 @@ public class ChallengeManager {
     }
 
     public void checkLetter(Context context){
+        Log.i(TAG,numberOfLetters+1+" letters collected so far");
+        if(numberOfLetters+1==1){
+            android.support.v7.app.AlertDialog alertDialog = getAlertDialog(context);
+            alertDialog.setMessage("You have collected your first letter! \n" +
+                    "Here is a bonus hint for you!");
+            alertDialog.show();
+            changeNumberOfHints(1);
+            challengeDb.child("100letters").child("completed").getRef().setValue(true);
+        }
       if(numberOfLetters+1==100){
-          System.out.println("should be 100");
           android.support.v7.app.AlertDialog alertDialog = getAlertDialog(context);
           alertDialog.setMessage("You have collected 100 letters! \n" +
                   "Here is a bonus hint for you!");
@@ -226,7 +256,7 @@ public class ChallengeManager {
 
 
 
-        statisticsDb.child("NumberOfLetters").getRef().setValue(numberOfLetters+1);
+        noLettersRef.setValue(numberOfLetters+1);
 
     }
 

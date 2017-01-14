@@ -1,4 +1,4 @@
-package com.example.rama.androidtut.UtilityClasses;
+package com.example.rama.grabble.UtilityClasses;
 
 /**
  * Scores to be stored in the database, containing a name and complete status

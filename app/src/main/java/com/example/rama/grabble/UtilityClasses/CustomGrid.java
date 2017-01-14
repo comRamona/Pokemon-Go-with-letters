@@ -1,4 +1,4 @@
-package com.example.rama.androidtut.UtilityClasses;
+package com.example.rama.grabble.UtilityClasses;
 
 /**
  * Created by rama on 06/11/16.
@@ -13,7 +13,7 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.example.rama.androidtut.R;
+import com.example.rama.grabble.R;
 
 public class CustomGrid extends BaseAdapter {
     private final String[] web;

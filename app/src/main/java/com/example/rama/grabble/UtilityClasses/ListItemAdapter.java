@@ -1,4 +1,4 @@
-package com.example.rama.androidtut.UtilityClasses;
+package com.example.rama.grabble.UtilityClasses;
 
 /**
  * Created by Ramona on 02/01/2017.
@@ -6,14 +6,13 @@ package com.example.rama.androidtut.UtilityClasses;
 
 
         import android.content.Context;
-        import android.graphics.Color;
         import android.view.LayoutInflater;
         import android.view.View;
         import android.view.ViewGroup;
         import android.widget.BaseAdapter;
         import android.widget.TextView;
 
-        import com.example.rama.androidtut.R;
+        import com.example.rama.grabble.R;
 
         import java.util.List;
 

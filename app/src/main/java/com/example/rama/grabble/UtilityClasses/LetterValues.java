@@ -1,4 +1,4 @@
-package com.example.rama.androidtut.UtilityClasses;
+package com.example.rama.grabble.UtilityClasses;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -1,4 +1,4 @@
-package com.example.rama.androidtut;
+package com.example.rama.grabble;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
@@ -21,6 +21,6 @@ public class ExampleInstrumentedTest {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getTargetContext();
 
-        assertEquals("com.example.rama.androidtut", appContext.getPackageName());
+        assertEquals("com.example.rama.grabble", appContext.getPackageName());
     }
 }

@@ -1,4 +1,4 @@
-package com.example.rama.androidtut.UtilityClasses;
+package com.example.rama.grabble.UtilityClasses;
 
 
 import java.util.*;
@@ -43,6 +43,7 @@ public class Trie{
 
     public void add(String s){
 
+        s=s.toUpperCase();
         TrieNode node=root;
         for(int i=0;i<s.length();i++){
             char c=s.charAt(i);
@@ -54,6 +55,7 @@ public class Trie{
     }
 
     public boolean startsWith(String prefix) {
+        prefix=prefix.toUpperCase();
         TrieNode node = root;
         for (int i = 0; i < prefix.length(); i++) {
             char ch = prefix.charAt(i);
@@ -66,6 +68,7 @@ public class Trie{
     }
 
     public boolean contains(String word){
+        word=word.toUpperCase();
         TrieNode node = root;
         for (int i = 0; i < word.length(); i++) {
             char ch = word.charAt(i);
@@ -77,6 +80,7 @@ public class Trie{
         return node.isLeaf;
     }
     public List<String> getAllWordsStartingWith(String prefix){
+        prefix=prefix.toUpperCase();
         TrieNode node = root;
         List<String> li=new ArrayList<>();
         for (int i = 0; i < prefix.length(); i++) {

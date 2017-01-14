@@ -1,16 +1,13 @@
-package com.example.rama.androidtut.UtilityClasses;
+package com.example.rama.grabble.UtilityClasses;
 
 import android.content.Context;
-import android.content.SharedPreferences;
-import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 
-import com.example.rama.androidtut.R;
-import com.google.android.gms.maps.model.LatLng;
+import com.example.rama.grabble.R;
 
 
 /**

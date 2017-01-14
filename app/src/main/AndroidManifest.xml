@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.rama.androidtut">
+    package="com.example.rama.grabble">
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
@@ -21,7 +21,7 @@
         android:label="Grabble"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".MainActivity">
+        <activity android:name="com.example.rama.grabble.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -42,11 +42,13 @@
             android:value="@string/google_maps_key" />
 
         <activity
-            android:name=".CampusMapActivity"
-            android:label="@string/title_activity_campus_map" />
+            android:name="com.example.rama.grabble.CampusMapActivity"
+            android:label="@string/title_activity_campus_map"
+            android:screenOrientation="portrait"/>
         <activity
-            android:name=".WordArenaActivity"
-            android:label="Word Arena" />
+            android:name="com.example.rama.grabble.WordArenaActivity"
+            android:label="Word Arena"
+            android:screenOrientation="portrait"/>
 
         <!--
  ATTENTION: This was auto-generated to add Google Play services to your project for
@@ -56,9 +58,12 @@
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
 
-        <activity android:name=".LeaderboardActivity" android:label="Leaderboard"></activity>
-        <activity android:name=".StatisticsActivity" android:label="Statistics"></activity>
-        <activity android:name=".ChallengesActivity" android:label="Challenges"></activity>
+        <activity android:name="com.example.rama.grabble.LeaderboardActivity" android:label="Leaderboard"
+            android:screenOrientation="portrait"></activity>
+        <activity android:name="com.example.rama.grabble.StatisticsActivity" android:label="Statistics"
+            android:screenOrientation="portrait"></activity>
+        <activity android:name="com.example.rama.grabble.ChallengesActivity" android:label="Challenges"
+            android:screenOrientation="portrait"></activity>
     </application>
 
 </manifest>

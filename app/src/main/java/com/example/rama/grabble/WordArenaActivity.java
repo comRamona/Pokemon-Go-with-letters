@@ -1,11 +1,10 @@
-package com.example.rama.androidtut;
+package com.example.rama.grabble;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.ConnectivityManager;
@@ -26,11 +25,11 @@ import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.rama.androidtut.UtilityClasses.ChallengeManager;
-import com.example.rama.androidtut.UtilityClasses.LetterAdapter;
-import com.example.rama.androidtut.UtilityClasses.LetterValues;
-import com.example.rama.androidtut.UtilityClasses.Score;
-import com.example.rama.androidtut.UtilityClasses.Trie;
+import com.example.rama.grabble.UtilityClasses.ChallengeManager;
+import com.example.rama.grabble.UtilityClasses.LetterAdapter;
+import com.example.rama.grabble.UtilityClasses.LetterValues;
+import com.example.rama.grabble.UtilityClasses.Score;
+import com.example.rama.grabble.UtilityClasses.Trie;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -49,10 +48,9 @@ import java.util.Scanner;
 public class WordArenaActivity extends AppCompatActivity {
 
     static String TAG = "WordArenaActivity";
+    int chosen = 0;
+    DatabaseReference gamePlayDb;
     private int score;
-
-
-    SharedPreferences sharedPref;
     //text view containing 7 characters to be filled by the user
     private TextView[] charViews;
     //submit button
@@ -79,15 +77,19 @@ public class WordArenaActivity extends AppCompatActivity {
     private Trie dictionary;
     //broadcat receiver to monitor internet connection(needed for maintaining database state)
     private BroadcastReceiver internetBroadcastReceiver;
-    int chosen=0;
-
-    DatabaseReference gamePlayDb;
     private ValueEventListener scoreEventLinstener;
     private ValueEventListener hintsEventListener;
 
+    private static int calculateScore(String word) {
+        int sc = 0;
+        for (int i = 0; i < word.length(); i++) {
+            sc += LetterValues.getValue(word.charAt(i));
+        }
+        return sc;
+    }
+
     /**
      * Get view and database connections
-     * @param savedInstanceState
      */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -96,13 +98,13 @@ public class WordArenaActivity extends AppCompatActivity {
 
         //get view resources and initialize variables
         submitButton = (Button) findViewById(R.id.yes);
-        hintButton=(Button) findViewById(R.id.hints);
+        hintButton = (Button) findViewById(R.id.hints);
         LinearLayout wordLayout = (LinearLayout) findViewById(R.id.word);
         GridView letters = (GridView) findViewById(R.id.letters);
 
         //initialize variables
         charViews = new TextView[7];
-        ltrAdapt=new LetterAdapter(this);
+        ltrAdapt = new LetterAdapter(this);
         letters.setAdapter(ltrAdapt);
         submitButton.setEnabled(false);
 
@@ -124,30 +126,27 @@ public class WordArenaActivity extends AppCompatActivity {
         FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
         FirebaseUser user = firebaseAuth.getCurrentUser();
         loadDictionary();
-        scoreDb= database.child("Scores").child(user.getUid()).getRef();
+        scoreDb = database.child("Scores").child(user.getUid()).getRef();
 
 
-        hintsDb=database.child("Statistics").child(user.getUid()).child("NumberOfHints").getRef();
-
+        hintsDb = database.child("Statistics").child(user.getUid()).child("NumberOfHints").getRef();
 
 
         gamePlayDb = database.child("GamePlay").child(user.getUid());
-        letterCounts=new int[26];
-        temporaryCount=new int[26];
-        letterRefs=new DatabaseReference[26];
+        letterCounts = new int[26];
+        temporaryCount = new int[26];
+        letterRefs = new DatabaseReference[26];
 
-        challengeManager=ChallengeManager.getInstance();
-
+        challengeManager = ChallengeManager.getInstance();
 
 
     }
 
-
     /**
      * Load the dictionary file in memory, using a trie as a data structure
      */
-    private void loadDictionary(){
-        dictionary =new Trie();
+    private void loadDictionary() {
+        dictionary = new Trie();
         try {
             InputStream inputStream = getResources().openRawResource(R.raw.grabdict);
             Scanner scanner = new Scanner(inputStream);
@@ -155,34 +154,33 @@ public class WordArenaActivity extends AppCompatActivity {
                 String word = scanner.nextLine().toUpperCase();
                 dictionary.add(word);
             }
-        }
-        catch(Exception e){
-            Log.e(TAG,"Could not load dictionary",e);
+        } catch (Exception e) {
+            Log.e(TAG, "Could not load dictionary", e);
         }
     }
+
     public void letterPressed(View view) {
 
+        if (chosen >= 7) return;
         //user has pressed a letter to guess
-        String ltr=((TextView)view).getText().toString();
+        String ltr = ((TextView) view).getText().toString();
 
         //can only press letter if more than 0 count
-        if(temporaryCount[ltr.charAt(0)-'A']<=0) return;
-        String newText=ltr.charAt(0)+":"+(temporaryCount[ltr.charAt(0)-'A']-1);
-        temporaryCount[ltr.charAt(0)-'A']--;
-        ((TextView)view).setText(newText);
+        if (temporaryCount[ltr.charAt(0) - 'A'] <= 0) return;
+        String newText = ltr.charAt(0) + ":" + (temporaryCount[ltr.charAt(0) - 'A'] - 1);
+        temporaryCount[ltr.charAt(0) - 'A']--;
+        ((TextView) view).setText(newText);
         char letterChar = ltr.charAt(0);
-       // view.setBackgroundResource(R.drawable.letter_down);
-        if(chosen<7) {
+        // view.setBackgroundResource(R.drawable.letter_down);
+        if (chosen < 7) {
             charViews[chosen].setText(String.valueOf(letterChar));
             charViews[chosen].setTextColor(Color.BLACK);
             chosen++;
         }
-        if(chosen==7) {
+        if (chosen == 7) {
             submitButton.setEnabled(true);
         }
     }
-
-
 
     @Override
 
@@ -200,8 +198,9 @@ public class WordArenaActivity extends AppCompatActivity {
         super.onPause();
         scoreDb.removeEventListener(scoreEventLinstener);
         hintsDb.removeEventListener(hintsEventListener);
-
+        challengeManager.removeListeners();
         unregisterReceiver(internetBroadcastReceiver);
+
         Log.i(TAG, "Paused");
 
     }
@@ -213,45 +212,46 @@ public class WordArenaActivity extends AppCompatActivity {
         super.onResume();
 
         Log.i(TAG, "Resumed");
-        for(int i=0;i<26;i++){
-            final int j=i;
+        for (int i = 0; i < 26; i++) {
+            final int j = i;
             String letter = (char) (i + 'A') + "";
-            letterRefs[i]= gamePlayDb.child("Letters").child(letter).getRef();
+            letterRefs[i] = gamePlayDb.child("Letters").child(letter).getRef();
 
             letterRefs[i].addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
-                    letterCounts[j]= dataSnapshot.getValue(Integer.class);
-                    temporaryCount[j]=letterCounts[j];
-                    ltrAdapt.updateCount(j,letterCounts[j]);
+                    letterCounts[j] = dataSnapshot.getValue(Integer.class);
+                    temporaryCount[j] = letterCounts[j];
+                    ltrAdapt.updateCount(j, letterCounts[j]);
                     ltrAdapt.notifyDataSetChanged();
 
                 }
 
                 @Override
                 public void onCancelled(DatabaseError databaseError) {
-                    Log.e(TAG,databaseError.getMessage());
+                    Log.e(TAG, databaseError.getMessage());
                 }
-            });}
+            });
+        }
 
-        scoreDb.addValueEventListener(scoreEventLinstener=new ValueEventListener() {
+        scoreDb.addValueEventListener(scoreEventLinstener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                score=(int) dataSnapshot.getValue(Score.class).getScore();
+                score = dataSnapshot.getValue(Score.class).getScore();
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
 
-                Log.e(TAG,databaseError.getMessage());
+                Log.e(TAG, databaseError.getMessage());
             }
         });
 
-        hintsDb.addValueEventListener(hintsEventListener=new ValueEventListener() {
+        hintsDb.addValueEventListener(hintsEventListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                noHints=dataSnapshot.getValue(Integer.class);
-                String s="Hints: "+noHints;
+                noHints = dataSnapshot.getValue(Integer.class);
+                String s = "Hints: " + noHints;
                 hintButton.setText(s);
             }
 
@@ -262,6 +262,7 @@ public class WordArenaActivity extends AppCompatActivity {
         });
 
         installInternetListener();
+        challengeManager.removeListeners();
 
     }
 
@@ -285,17 +286,13 @@ public class WordArenaActivity extends AppCompatActivity {
 
     }
 
-    public void refreshScreen(View view){
-        LayoutInflater inflater = (LayoutInflater) this
-                .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View layout = inflater.inflate(R.layout.popup_word,
-                (ViewGroup) findViewById(R.id.show_word));
+    //reset all counts
+    public void refreshScreen(View view) {
         ltrAdapt.reset(letterCounts);
-        for(int i=0;i<7;i++)
+        for (int i = 0; i < 7; i++)
             charViews[i].setText("");
-        chosen=0;
-        for(int i=0;i<26;i++)
-            temporaryCount[i]=letterCounts[i];
+        chosen = 0;
+        System.arraycopy(letterCounts, 0, temporaryCount, 0, letterCounts.length);
     }
 
     public void checkWord(View view) {
@@ -314,16 +311,16 @@ public class WordArenaActivity extends AppCompatActivity {
 
             }
         });
-        TextView textView=(TextView) layout.findViewById(R.id.tvcheckWord);
-        String word=getCurrentWord();
-        String response=word+" is not a valid word. Try again!";
-        if(dictionary.contains(word)){
+        TextView textView = (TextView) layout.findViewById(R.id.tvcheckWord);
+        String word = getCurrentWord();
+        String response = word + " is not a valid word. Try again!";
+        if (dictionary.contains(word)) {
 
-            int scoreToAdd=calculateScore(word);
-            response=word+"\n"+scoreToAdd+" points";
-            int newScore=score+scoreToAdd;
-            challengeManager.checkWord(word,this,scoreToAdd);
-            challengeManager.checkScore(newScore,this);
+            int scoreToAdd = calculateScore(word);
+            response = word + "\n" + scoreToAdd + " points";
+            int newScore = score + scoreToAdd;
+            challengeManager.checkWord(word, this, scoreToAdd);
+            challengeManager.checkScore(newScore, this);
             scoreDb.child("score").setValue(newScore);
             updateCounts(word);
 
@@ -334,32 +331,25 @@ public class WordArenaActivity extends AppCompatActivity {
 
     }
 
-    private static int calculateScore(String word){
-        int sc=0;
-        for(int i=0;i<word.length();i++){
-            sc+=LetterValues.getValue(word.charAt(i));
-        }
-        return sc;
-    }
-    private String getCurrentWord(){
-        StringBuilder sb=new StringBuilder();
-        for(int i=0;i<7;i++)
+    private String getCurrentWord() {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < 7; i++)
             sb.append(charViews[i].getText());
         return sb.toString().toUpperCase();
     }
 
-    private void updateCounts(String word){
-        for(int i=0;i<word.length();i++){
-            int pos=word.charAt(i)-'A';
-            int t=temporaryCount[pos];
+    private void updateCounts(String word) {
+        for (int i = 0; i < word.length(); i++) {
+            int pos = word.charAt(i) - 'A';
+            int t = temporaryCount[pos];
             letterRefs[pos].setValue(t);
-            letterCounts[pos]=t;
+            letterCounts[pos] = t;
         }
     }
 
-    public void giveHint(View view){
+    public void giveHint(View view) {
 
-        if(noHints>=1) {
+        if (noHints >= 1) {
             String prefix = getCurrentWord();
             String message = "You need to input at least 3 letters to get a hint.";
             if (prefix.length() >= 3) {
@@ -381,21 +371,20 @@ public class WordArenaActivity extends AppCompatActivity {
         }
     }
 
-    private String checkMatch(List<String> res){
-        Map<Character,Integer> counter=new HashMap<>();
-        for(String s:res){
+    private String checkMatch(List<String> res) {
+        Map<Character, Integer> counter = new HashMap<>();
+        for (String s : res) {
             counter.clear();
-            boolean found=true;
-            for(int i=0;i<26;i++){
-                counter.put(((char)(i+'A')),temporaryCount[i]);
+            boolean found = true;
+            for (int i = 0; i < 26; i++) {
+                counter.put(((char) (i + 'A')), temporaryCount[i]);
             }
-            for(int i=0;i<s.length();i++){
-                if(counter.get(s.charAt(i))>0){
-                    counter.put(s.charAt(i),counter.get(s.charAt(i))-1);
-                }
-                else found=false;
+            for (int i = 0; i < s.length(); i++) {
+                if (counter.get(s.charAt(i)) > 0) {
+                    counter.put(s.charAt(i), counter.get(s.charAt(i)) - 1);
+                } else found = false;
             }
-            if(found) {
+            if (found) {
                 return s;
             }
         }
@@ -427,24 +416,17 @@ public class WordArenaActivity extends AppCompatActivity {
 
                     Bundle extras = intent.getExtras();
 
-                    NetworkInfo info = (NetworkInfo) extras
+                    NetworkInfo info = extras
                             .getParcelable("networkInfo");
 
                     NetworkInfo.State state = info.getState();
 
-                    if (state == NetworkInfo.State.CONNECTED) {
+                    if (state != NetworkInfo.State.CONNECTED) {
 
+                        Toast.makeText(getApplicationContext(), "Internet connection is off. Turn it on to save your progress", Toast.LENGTH_LONG).show();
 
-
-
-                    } else {
-
-
-
-                            Toast.makeText(getApplicationContext(), "Internet connection is off. Turn it on to save your progress", Toast.LENGTH_LONG).show();
 
                     }
-
                 }
             };
 
