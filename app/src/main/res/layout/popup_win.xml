@@ -116,7 +116,7 @@
             android:clickable="true"
             app:fabSize="mini"
             android:onClick="fab_cancel"
-            app:srcCompat="@drawable/ic_close_light" />
+            app:srcCompat="@android:drawable/ic_menu_close_clear_cancel" />
 
     </LinearLayout>
 

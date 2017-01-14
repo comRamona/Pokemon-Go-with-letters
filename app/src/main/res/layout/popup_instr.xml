@@ -74,7 +74,7 @@
             android:layout_gravity="center"
             android:clickable="true"
             app:fabSize="mini"
-            app:srcCompat="@drawable/ic_close_light"
+            app:srcCompat="@android:drawable/ic_menu_close_clear_cancel"
             android:layout_weight="0.11" />
 
 
