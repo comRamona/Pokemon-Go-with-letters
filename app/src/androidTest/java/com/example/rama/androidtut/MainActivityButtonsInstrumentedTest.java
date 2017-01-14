@@ -16,6 +16,7 @@ import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.action.ViewActions.click;
 import static android.support.test.espresso.assertion.ViewAssertions.matches;
 import static android.support.test.espresso.matcher.ViewMatchers.isClickable;
+import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static android.support.test.espresso.matcher.ViewMatchers.isEnabled;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
 import static org.hamcrest.Matchers.allOf;
@@ -33,6 +34,18 @@ public class MainActivityButtonsInstrumentedTest {
     public void showInstructions(){
         onView(withId(R.id.help)).perform(click());
     }
+
+    /**
+     * Test starting game
+     */
+    @Test
+    public void startGame(){
+        onView(withId(R.id.start_game_button)).perform(click());
+    }
+
+    /**
+     * Test sign it button
+     */
     @Test
     public void signIn(){
         onView(withId(R.id.email_sign_in_button)).check(matches(allOf( isEnabled(), isClickable()))).perform(

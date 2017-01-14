@@ -20,10 +20,12 @@
         android:background="@drawable/circle"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="15dp"
+        android:layout_marginLeft="5dp"
+        android:layout_marginRight="5dp"
+        android:layout_marginBottom="10dp"
         android:gravity="center"
         android:orientation="horizontal"
-        android:padding="20dp" >
+        android:padding="10dp" >
     </LinearLayout>
 
     <!-- letters -->
@@ -37,16 +39,16 @@
         android:background="@color/WhiteSmoke"
         android:horizontalSpacing="5dp"
         android:numColumns="5"
-        android:padding="10dp"
+        android:padding="5dp"
         android:stretchMode="columnWidth"
-        android:verticalSpacing="10dp" />
+        android:verticalSpacing="5dp" />
 
     <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:paddingLeft="16dp"
-        android:paddingRight="16dp">
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp">
 
         <Button
             android:layout_width="0dp"
