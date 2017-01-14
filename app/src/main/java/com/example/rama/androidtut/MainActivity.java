@@ -268,6 +268,7 @@ public class MainActivity extends BaseActivity implements
         hideProgressDialog();
         if (user != null) {
             mStatusTextView.setText(getString(R.string.emailpassword_status_fmt, user.getEmail()));
+            mStatusTextView.setTextSize(18);
             findViewById(R.id.email_password_buttons).setVisibility(View.GONE);
             findViewById(R.id.email_password_fields).setVisibility(View.GONE);
             findViewById(R.id.start_game_button).setVisibility(View.VISIBLE);
