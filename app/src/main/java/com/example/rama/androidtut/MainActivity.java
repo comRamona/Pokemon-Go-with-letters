@@ -100,7 +100,7 @@ public class MainActivity extends BaseActivity implements
                         .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
                 View layout = inflater.inflate(R.layout.popup_instr,
                         (ViewGroup) findViewById(R.id.show_instr));
-                pwindo = new PopupWindow(layout, 400, 250, true);
+                pwindo = new PopupWindow(layout, 400, 400, true);
                 pwindo.showAtLocation(layout, Gravity.CENTER, 0, 0);
                 pwindo.setBackgroundDrawable(new ColorDrawable());
                 FloatingActionButton fab_close = (FloatingActionButton) layout.findViewById(R.id.instr_cancel);

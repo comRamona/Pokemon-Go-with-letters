@@ -747,7 +747,7 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
 
                     } else {
                         Log.i(TAG,"Internet turned off");
-                        showInternetAlert();
+                        Toast.makeText(context, "Turn on internet", Toast.LENGTH_SHORT).show();
                     }
 
                 }
@@ -874,7 +874,7 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             View layout = inflater.inflate(R.layout.popup_win,
                     (ViewGroup) findViewById(R.id.popup_element));
-            pwindo = new PopupWindow(layout, 250, 250, true);
+            pwindo = new PopupWindow(layout, 250, 420, true);
             pwindo.showAtLocation(layout, Gravity.CENTER, 0, 0);
             pwindo.setBackgroundDrawable(new ColorDrawable());
 
