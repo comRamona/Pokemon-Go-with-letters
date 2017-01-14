@@ -874,7 +874,7 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             View layout = inflater.inflate(R.layout.popup_win,
                     (ViewGroup) findViewById(R.id.popup_element));
-            pwindo = new PopupWindow(layout, 800, 800, true);
+            pwindo = new PopupWindow(layout, 250, 250, true);
             pwindo.showAtLocation(layout, Gravity.CENTER, 0, 0);
             pwindo.setBackgroundDrawable(new ColorDrawable());
 

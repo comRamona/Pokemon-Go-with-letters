@@ -283,23 +283,6 @@ public class WordArenaActivity extends AppCompatActivity {
 
     }
 
-    @Override
-    protected void onDestroy() {
-
-        super.onDestroy();
-
-        Log.i(TAG, "Destroyed");
-
-    }
-
-    @Override
-    protected void onStart() {
-
-        super.onStart();
-
-        Log.i(TAG, "Started");
-
-    }
 
     /**
      * Reset current word
@@ -323,7 +306,7 @@ public class WordArenaActivity extends AppCompatActivity {
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View layout = inflater.inflate(R.layout.popup_word,
                 (ViewGroup) findViewById(R.id.show_word));
-        pwindo = new PopupWindow(layout, 800, 800, true);
+        pwindo = new PopupWindow(layout, 300, 300, true);
         pwindo.showAtLocation(layout, Gravity.CENTER, 0, 0);
         pwindo.setBackgroundDrawable(new ColorDrawable());
         FloatingActionButton fab_close = (FloatingActionButton) layout.findViewById(R.id.welldone_cancel);

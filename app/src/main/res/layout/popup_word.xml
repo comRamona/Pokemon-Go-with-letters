@@ -6,6 +6,7 @@
     android:layout_height="200dp"
     android:background="@drawable/pop"
     android:orientation="vertical"
+    android:layout_gravity="center"
     android:weightSum="1">
 
 
@@ -26,27 +27,29 @@
             android:layout_width="60dp"
             android:layout_height="64dp"
             android:layout_gravity="center"
-            android:contentDescription="@string/desc_firebase_lockup"
             android:src="@drawable/trophy"
             />
 
-
-        <TextView
-
-            android:layout_width="match_parent"
+        <LinearLayout
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginLeft="30dp"
-            android:id="@+id/tvcheckWord"
+            android:layout_gravity="center">
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:id="@+id/tvcheckWord"
+                android:text="Congrats!"
+                android:textAppearance="@style/TextAppearance.AppCompat.Display3" />
+        </LinearLayout>
 
-            android:text="Congrats!
-            "
-            android:textAppearance="@style/TextAppearance.AppCompat.Display3" />
+
 
         <android.support.design.widget.FloatingActionButton
             android:id="@+id/welldone_cancel"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
             android:layout_gravity="center"
             android:clickable="true"
             app:fabSize="mini"
