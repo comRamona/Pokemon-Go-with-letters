@@ -17,7 +17,7 @@
 
     <application
         android:allowBackup="true"
-        android:icon="@drawable/gicon"
+        android:icon="@drawable/gicon6"
         android:label="Grabble"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
