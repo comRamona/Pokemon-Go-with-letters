@@ -88,7 +88,7 @@ public class WordArenaActivity extends AppCompatActivity implements Connectivity
      * @param word word
      * @return score
      */
-    private static int calculateScore(String word) {
+    public static int calculateScore(String word) {
         int sc = 0;
         for (int i = 0; i < word.length(); i++) {
             sc += LetterValues.getValue(word.charAt(i));
@@ -343,7 +343,7 @@ public class WordArenaActivity extends AppCompatActivity implements Connectivity
         if (dictionary.contains(word)) {
 
             int scoreToAdd = calculateScore(word);
-            response = word + "\n" + scoreToAdd + " points";
+            response = "You have created a new word!\n"+word + "\n" + scoreToAdd + " points";
             int newScore = score + scoreToAdd;
             challengeManager.checkWord(word, this, scoreToAdd);
             challengeManager.checkScore(newScore, this);
@@ -398,10 +398,12 @@ public class WordArenaActivity extends AppCompatActivity implements Connectivity
                 if (res == null || res.size() == 0) message = "No completion found.";
                 else {
                     String match = checkMatch(res);
-                    hintsDb.setValue(noHints - 1);
+
                     if (match == null)
                         message = "No completion found. With a few more letters you could form " + res.get(0);
-                    else message = "How about " + match + "?";
+                    else {
+                        message = "How about " + match + "?";
+                        hintsDb.setValue(noHints - 1);}
                 }
             }
             AlertDialog alertDialog = BaseActivity.getAlertDialog(this);

@@ -4,8 +4,8 @@
     android:id="@+id/show_instr"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:layout_margin="5dp"
     android:background="@drawable/pop"
+    android:layout_margin="10dp"
     android:orientation="vertical"
 
     android:weightSum="1">
@@ -24,7 +24,7 @@
             <TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_margin="20dp"
+                android:layout_margin="10dp"
 
                 >
                 <TableRow
@@ -58,9 +58,27 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="5dp"
-                        android:text="Click the (...) options  menu to access your Challenges, Leaderboard, Statistics and Word Arena.  If you get stuck, simply input at least 3 letters and press Hint. \nYou get more hints by completing challenges."></TextView>
+                        android:text="Click the (...) options  menu to access your Challenges, Leaderboard, Statistics and Word Arena."></TextView>
 
                 </TableRow>
+
+                <TableRow>
+                    <TextView
+                        android:layout_column="1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="20dp"
+                        android:textColor="@color/Orange"
+                        android:text="•"></TextView>
+                    <TextView
+                        android:layout_column="2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="5dp"
+                        android:text="If you get stuck, simply input at least 2 letters and press Hint. \nYou get more hints by completing challenges.\n"></TextView>
+
+                </TableRow>
+
 
             </TableLayout>
 

@@ -220,7 +220,7 @@ public class ChallengeManager {
                 challengeDb.child("1eachletter").child("completed").getRef().setValue(true);
                 android.support.v7.app.AlertDialog alertDialog = getAlertDialog(context);
                 alertDialog.setMessage("You have collected 1 of each letter! \n" +
-                        "Here are bonus hints for you!");
+                        "Here are 3 bonus hints for you!");
                 alertDialog.show();
                 changeNumberOfHints(3);
             }

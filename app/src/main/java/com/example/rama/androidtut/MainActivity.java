@@ -115,6 +115,8 @@ public class MainActivity extends BaseActivity implements
             }
         });
 
+        mEmailField.setText("testaccount1@grabble.com");
+        mPasswordField.setText("testaccount");
 
     }
 
@@ -123,8 +125,6 @@ public class MainActivity extends BaseActivity implements
     public void onStart() {
         super.onStart();
         mAuth.addAuthStateListener(mAuthListener);
-
-
     }
 
 

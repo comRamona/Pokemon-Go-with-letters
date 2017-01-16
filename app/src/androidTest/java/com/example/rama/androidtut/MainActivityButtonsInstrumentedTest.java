@@ -47,7 +47,7 @@ public class MainActivityButtonsInstrumentedTest {
      * Test sign it button
      */
     @Test
-    public void signIn(){
+    public void signOut(){
         onView(withId(R.id.email_sign_in_button)).check(matches(allOf( isEnabled(), isClickable()))).perform(
                 new ViewAction() {
                     @Override

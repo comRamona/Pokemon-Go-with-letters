@@ -1,7 +1,7 @@
 package com.example.rama.androidtut.UtilityClasses;
 
 /**
- * Created by Ramona on 16/01/2017.
+ * Interface for acting when the status of the network connection has changed
  */
 
 public interface ConnectivityReceiverListener {

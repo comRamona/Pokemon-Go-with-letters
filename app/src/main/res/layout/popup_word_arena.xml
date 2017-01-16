@@ -15,7 +15,6 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:weightSum="1"
-        android:layout_margin="30dp"
         android:padding="5dp"
         android:layout_weight="0.47">
 
@@ -28,7 +27,7 @@
             android:layout_width="60dp"
             android:layout_height="64dp"
             android:layout_gravity="center"
-            android:visibility="invisible"
+            android:visibility="gone"
             android:src="@drawable/trophy"
             />
 

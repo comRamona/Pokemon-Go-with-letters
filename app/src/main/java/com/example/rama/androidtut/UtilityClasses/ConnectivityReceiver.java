@@ -6,6 +6,11 @@ import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 
+/**
+ * Class to monitor internet connection and act when the status is changed.
+ * Followed the following tutorial:
+ * http://www.androidhive.info/2012/07/android-detect-internet-connection-status/
+ */
 
 public class ConnectivityReceiver
         extends BroadcastReceiver {
@@ -15,8 +20,6 @@ public class ConnectivityReceiver
     public ConnectivityReceiver() {
         super();
     }
-
-
 
     @Override
     public void onReceive(Context context, Intent arg1) {
@@ -28,17 +31,6 @@ public class ConnectivityReceiver
         if(connectivityReceiverListener!=null)
           connectivityReceiverListener.onNetworkConnectionChanged(isConnected);
     }
-
-    public static boolean isConnected() {
-        ConnectivityManager
-                cm = (ConnectivityManager) MyApplication.getInstance().getApplicationContext()
-                .getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
-        return activeNetwork != null
-                && activeNetwork.isConnectedOrConnecting();
-    }
-
-
 
 }
 
