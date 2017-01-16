@@ -19,8 +19,16 @@
         android:allowBackup="true"
         android:icon="@drawable/gicon6"
         android:label="Grabble"
+        android:name='.UtilityClasses.MyApplication'
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <receiver
+            android:name=".UtilityClasses.ConnectivityReceiver"
+            android:enabled="true">
+            <intent-filter>
+                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
+            </intent-filter>
+        </receiver>
         <activity android:name="com.example.rama.androidtut.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

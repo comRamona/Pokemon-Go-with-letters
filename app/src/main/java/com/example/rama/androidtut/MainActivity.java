@@ -98,9 +98,9 @@ public class MainActivity extends BaseActivity implements
             public void onClick(View v) {
                 LayoutInflater inflater = (LayoutInflater) MainActivity.this
                         .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                View layout = inflater.inflate(R.layout.popup_instr,
+                View layout = inflater.inflate(R.layout.popup_instructions,
                         (ViewGroup) findViewById(R.id.show_instr));
-                pwindo = new PopupWindow(layout, 400, 400, true);
+                pwindo = new PopupWindow(layout, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, true);
                 pwindo.showAtLocation(layout, Gravity.CENTER, 0, 0);
                 pwindo.setBackgroundDrawable(new ColorDrawable());
                 FloatingActionButton fab_close = (FloatingActionButton) layout.findViewById(R.id.instr_cancel);
@@ -134,6 +134,14 @@ public class MainActivity extends BaseActivity implements
         super.onStop();
         if (mAuthListener != null) {
             mAuth.removeAuthStateListener(mAuthListener);
+        }
+        if(pwindo!=null){
+            try{
+                pwindo.dismiss();
+            }
+            catch(Exception e){
+                Log.e(TAG,"Can't dismiss pop up");
+            }
         }
     }
 

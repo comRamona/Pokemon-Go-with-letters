@@ -2,8 +2,9 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/show_instr"
-    android:layout_width="match_parent"
+    android:layout_width="wrap_content"
     android:layout_height="wrap_content"
+    android:layout_margin="5dp"
     android:background="@drawable/pop"
     android:orientation="vertical"
 
@@ -58,24 +59,26 @@
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="5dp"
                         android:text="Click the (...) options  menu to access your Challenges, Leaderboard, Statistics and Word Arena.  If you get stuck, simply input at least 3 letters and press Hint. \nYou get more hints by completing challenges."></TextView>
+
                 </TableRow>
+
             </TableLayout>
 
-        </ScrollView>
+        </ScrollView>  <android.support.design.widget.FloatingActionButton
+        android:id="@+id/instr_cancel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:clickable="true"
+        app:fabSize="mini"
+        app:srcCompat="@android:drawable/ic_menu_close_clear_cancel"
+        android:layout_weight="0.11" />
 
 
 
 
 
-        <android.support.design.widget.FloatingActionButton
-            android:id="@+id/instr_cancel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:clickable="true"
-            app:fabSize="mini"
-            app:srcCompat="@android:drawable/ic_menu_close_clear_cancel"
-            android:layout_weight="0.11" />
+
 
 
     </LinearLayout>

@@ -1,12 +1,11 @@
 package com.example.rama.androidtut;
 
 import android.app.Activity;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.IntentSender;
+import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.location.Location;
 import android.net.ConnectivityManager;
@@ -16,6 +15,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
@@ -24,10 +24,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.PopupWindow;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.rama.androidtut.UtilityClasses.ChallengeManager;
+import com.example.rama.androidtut.UtilityClasses.ConnectivityReceiver;
+import com.example.rama.androidtut.UtilityClasses.ConnectivityReceiverListener;
 import com.example.rama.androidtut.UtilityClasses.KxmlParser;
+import com.example.rama.androidtut.UtilityClasses.MyApplication;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
@@ -49,6 +53,7 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -68,7 +73,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-public class CampusMapActivity extends FragmentActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener, ResultCallback<LocationSettingsResult>, GoogleMap.OnMarkerClickListener {
+public class CampusMapActivity extends FragmentActivity implements ConnectivityReceiverListener ,OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener, ResultCallback<LocationSettingsResult>, GoogleMap.OnMarkerClickListener {
 
     /**
      * The desired interval for location updates. Inexact. Updates may be more or less frequent.
@@ -129,20 +134,22 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
     private DatabaseReference database;
     private DatabaseReference markersDb;
     private DatabaseReference gamePlayDb;
-    private DatabaseReference[] letterRefs;
+    private DatabaseReference letterRefs;
     private DatabaseReference lastUpdatedRef;
     private FirebaseUser user;
     // ]] end of Firebase specific objects
     // ChallengeManager that is called every time a new event happens (letter collection)
     private ChallengeManager challengeManager;
     /**
-     * Broadcast receiver for monitoring internet connection, needed for saving game state
+     * Event listener for letter counts
      */
-    private BroadcastReceiver broadcastReceiver;
+    private ChildEventListener lettersEventListener;
     /**
      * Application context
      */
     private Context context;
+
+    private ConnectivityReceiver connectivityReceiver;
 
     /**
      * Obtain database connections and manage Google API and location updates.
@@ -189,24 +196,37 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
 
         gamePlayDb = database.child("GamePlay").child(user.getUid()).getRef();
         letterCounts = new int[26];
-        letterRefs = new DatabaseReference[26];
+        letterRefs=gamePlayDb.child("Letters").getRef();
+        letterRefs.addChildEventListener(lettersEventListener=new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                String key = dataSnapshot.getKey();
+                int i=key.charAt(0)-'A';
+                letterCounts[i] = dataSnapshot.getValue(Integer.class);
+            }
 
-        for (int i = 0; i < 26; i++) {
-            final int j = i;
-            String letter = (char) (i + 'A') + "";
-            letterRefs[i] = gamePlayDb.child("Letters").child(letter).getRef();
-            letterRefs[i].addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    letterCounts[j] = dataSnapshot.getValue(Integer.class);
-                }
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+                String key = dataSnapshot.getKey();
+                int i=key.charAt(0)-'A';
+                letterCounts[i] = dataSnapshot.getValue(Integer.class);
+            }
 
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
-                    Log.e(TAG, "Error updating db " + databaseError.getMessage());
-                }
-            });
-        }
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.e(TAG, databaseError.getMessage());
+            }
+        });
 
         //determine whether user has played the game on consecutive game (challenge)
         lastUpdatedRef = gamePlayDb.child("lastDownload").getRef();
@@ -269,8 +289,9 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
             checkLocationSettings();
         }
         Log.i(TAG, "Resuming and installing listener");
-        installInternetListener();
         challengeManager.initializeListeners();
+        MyApplication.getInstance().setConnectivityListener(this);
+
     }
 
     /**
@@ -283,8 +304,8 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
         if (mGoogleApiClient.isConnected()) {
             stopLocationUpdates();
         }
-        unregisterReceiver(broadcastReceiver);
         challengeManager.removeListeners();
+        letterRefs.removeEventListener(lettersEventListener);
         Log.i(TAG, "Unregistered internet receiver");
     }
 
@@ -295,6 +316,14 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
     protected void onStop() {
         super.onStop();
         mGoogleApiClient.disconnect();
+        if(pwindo!=null){
+            try{
+                pwindo.dismiss();
+            }
+            catch(Exception e){
+                Log.e(TAG,"Can't dismiss pop up");
+            }
+        }
         Log.i(TAG, "Stopping");
 
     }
@@ -441,21 +470,30 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
      * playing the game for the day and new markers should be downloaded.
      */
     public void downloadOrPopulateFromDatabase() {
-        if (!currentDay.equals(lastDownload)) {
-            lastDownload = currentDay;
-            lastUpdatedRef.setValue(lastDownload);
-            String name = user.getUid();
-            //different day, remove previous stored markers and download new ones
-            database.child("Markers").child(name).removeValue(new DatabaseReference.CompletionListener() {
-                @Override
-                public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
-                    loadMarkersFromWebsite();
+        ConnectivityManager connMgr = (ConnectivityManager)
+                getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
+        if (networkInfo != null && networkInfo.isConnected()) {
+                if (!currentDay.equals(lastDownload)) {
+                    lastDownload = currentDay;
+                    lastUpdatedRef.setValue(lastDownload);
+                    String name = user.getUid();
+                    //different day, remove previous stored markers and download new ones
+                    database.child("Markers").child(name).removeValue(new DatabaseReference.CompletionListener() {
+                        @Override
+                        public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                            loadMarkersFromWebsite();
+                        }
+                    });
+                } else {
+                    Toast.makeText(this, "Welcome back!", Toast.LENGTH_SHORT).show();
+                    repopulateMarkersFromDatabase();
                 }
-            });
-        } else {
-            Toast.makeText(this, "Welcome back!", Toast.LENGTH_SHORT).show();
-            repopulateMarkersFromDatabase();
+            }
+        else {
+            showInternetAlert();
         }
+
 
     }
 
@@ -487,7 +525,7 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
             challengeManager.checkLetter(this);
             int i = title.charAt(0) - 'A';
             int oldVal = letterCounts[i];
-            letterRefs[i].setValue(oldVal + 1);
+            letterRefs.child(title.charAt(0)+"").setValue(oldVal+1);
             letterCounts[i]++;
             challengeManager.checkCounts(letterCounts, this);
         } else {
@@ -684,10 +722,6 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
             try {
 
                 Log.i(TAG, "Downloading map...");
-                ConnectivityManager connMgr = (ConnectivityManager)
-                        getSystemService(Context.CONNECTIVITY_SERVICE);
-                NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
-                if (networkInfo != null && networkInfo.isConnected()) {
                     Calendar calendar = Calendar.getInstance();
                     Date date = calendar.getTime();
                     // full name form of the day
@@ -695,10 +729,6 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
                     String url = getResources().getString(R.string.lettersurl) + day.toLowerCase() + ".kml";
                     // fetch data
                     new DownloadLetters().execute(url);
-
-                } else {
-                    showInternetAlert();
-                }
             } catch (Error e) {
                 Log.i(TAG, "Loading markers failed" + e.getMessage());
             }
@@ -719,44 +749,7 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
 
     }
 
-    /**
-     * Install listener to get internet connection state
-     */
-    private void installInternetListener() {
 
-        if (broadcastReceiver == null) {
-
-            broadcastReceiver = new BroadcastReceiver() {
-
-                @Override
-                public void onReceive(Context context, Intent intent) {
-
-                    Bundle extras = intent.getExtras();
-
-                    NetworkInfo info = extras
-                            .getParcelable("networkInfo");
-
-                    NetworkInfo.State state = info.getState();
-
-                    if (state == NetworkInfo.State.CONNECTED) {
-
-                        if (!markers_loaded) {
-                            Log.i(TAG, "Internet turned on.");
-                            //downloadOrPopulateFromDatabase();
-                        }
-
-                    } else {
-                        Log.i(TAG,"Internet turned off");
-                        Toast.makeText(context, "Turn on internet", Toast.LENGTH_SHORT).show();
-                    }
-
-                }
-            };
-        }
-        final IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
-        registerReceiver(broadcastReceiver, intentFilter);
-    }
 
     /**
      * Display internet connection alert
@@ -774,7 +767,6 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
         alertDialog.setPositiveButton("Retry", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
                 dialog.cancel();
-                if (!markers_loaded) loadMarkersFromWebsite();
             }
         });
 
@@ -872,9 +864,9 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
             // We need to get the instance of the LayoutInflater
             LayoutInflater inflater = (LayoutInflater) this
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            View layout = inflater.inflate(R.layout.popup_win,
+            View layout = inflater.inflate(R.layout.popup_options_menu,
                     (ViewGroup) findViewById(R.id.popup_element));
-            pwindo = new PopupWindow(layout, 250, 420, true);
+            pwindo = new PopupWindow(layout, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, true);
             pwindo.showAtLocation(layout, Gravity.CENTER, 0, 0);
             pwindo.setBackgroundDrawable(new ColorDrawable());
 
@@ -882,6 +874,31 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public void onNetworkConnectionChanged(boolean isConnected) {
+        String message;
+        int color;
+        if (isConnected) {
+            message = "Good! Connected to Internet";
+            color = Color.WHITE;
+//            if(!markers_loaded){
+//                downloadOrPopulateFromDatabase();
+//            }
+        } else {
+            message = "Sorry! Not connected to internet";
+            color = Color.RED;
+        }
+
+        Snackbar snackbar = Snackbar
+                .make(findViewById(R.id.fabs), message, Snackbar.LENGTH_LONG);
+
+        View sbView = snackbar.getView();
+        TextView textView = (TextView) sbView.findViewById(android.support.design.R.id.snackbar_text);
+        textView.setTextColor(color);
+        snackbar.show();
+        Log.i(TAG,message);
     }
 
     /**
@@ -921,9 +938,9 @@ public class CampusMapActivity extends FragmentActivity implements OnMapReadyCal
                     newMarker.child("name").setValue(e.getDescription());
 
                 }
-
+                markers_loaded = true;
             }
-            markers_loaded = true;
+
 
         }
 

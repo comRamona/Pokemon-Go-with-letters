@@ -197,6 +197,7 @@ public class ChallengeManager {
     public void consecdays(Context context){
         Log.i(TAG,Boolean.toString(allChallenges.get("consecdays").isCompleted()));
         if(!allChallenges.get("consecdays").isCompleted()){
+            challengeDb.child("consecdays").child("completed").getRef().setValue(true);
             android.support.v7.app.AlertDialog alertDialog = getAlertDialog(context);
             alertDialog.setMessage("You have played the game on consecutive days! \n" +
                     "Here are 2 bonus hints for you!");
@@ -216,7 +217,7 @@ public class ChallengeManager {
         }
         if(oneEach){
             if(!allChallenges.get("1eachletter").isCompleted()) {
-                challengeDb.child("1eachletter").child("completed").getRef();
+                challengeDb.child("1eachletter").child("completed").getRef().setValue(true);
                 android.support.v7.app.AlertDialog alertDialog = getAlertDialog(context);
                 alertDialog.setMessage("You have collected 1 of each letter! \n" +
                         "Here are bonus hints for you!");
@@ -226,7 +227,7 @@ public class ChallengeManager {
         }
         if(fiveEach){
             if(!allChallenges.get("5eachletter").isCompleted()) {
-                challengeDb.child("5eachletter").child("completed").getRef();
+                challengeDb.child("5eachletter").child("completed").getRef().setValue(true);
                 android.support.v7.app.AlertDialog alertDialog = getAlertDialog(context);
                 alertDialog.setMessage("You have collected 5 of each letter! \n" +
                         "Here are 3 bonus hints for you!");
