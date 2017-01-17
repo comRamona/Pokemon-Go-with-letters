@@ -57,6 +57,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:onClick="fab_leaderboard"
+            android:id="@+id/show_arena"
             android:text="Leaderboard"
             />
 

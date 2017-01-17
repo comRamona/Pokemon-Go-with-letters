@@ -13,8 +13,7 @@ import com.example.rama.androidtut.R;
 /**
  * This is using demo code to accompany the Mobiletuts+ tutorial:
  * - Android SDK: Create a Hangman Game
- *
- * Sue Smith - January 2014
+ * https://code.tutsplus.com/tutorials/create-a-hangman-game-user-interface--mobile-21853
  */
 
 public class LetterAdapter extends BaseAdapter {

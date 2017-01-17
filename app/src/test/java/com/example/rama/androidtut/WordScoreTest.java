@@ -5,7 +5,7 @@ import org.junit.Test;
 import static junit.framework.Assert.assertEquals;
 
 /**
- * Created by Ramona on 16/01/2017.
+ * Calculate score for a word according to letter values
  */
 
 public class WordScoreTest {

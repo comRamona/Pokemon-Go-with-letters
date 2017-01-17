@@ -202,14 +202,18 @@ public class CampusMapActivity extends FragmentActivity implements ConnectivityR
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 String key = dataSnapshot.getKey();
                 int i=key.charAt(0)-'A';
-                letterCounts[i] = dataSnapshot.getValue(Integer.class);
+                if(i>=0&&i<26) {
+                    letterCounts[i] = dataSnapshot.getValue(Integer.class);
+                }
             }
 
             @Override
             public void onChildChanged(DataSnapshot dataSnapshot, String s) {
                 String key = dataSnapshot.getKey();
                 int i=key.charAt(0)-'A';
-                letterCounts[i] = dataSnapshot.getValue(Integer.class);
+                if(i>=0&&i<26) {
+                    letterCounts[i] = dataSnapshot.getValue(Integer.class);
+                }
             }
 
             @Override

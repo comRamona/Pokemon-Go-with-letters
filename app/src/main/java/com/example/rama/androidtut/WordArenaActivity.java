@@ -161,6 +161,7 @@ public class WordArenaActivity extends AppCompatActivity implements Connectivity
                 String word = scanner.nextLine().toUpperCase();
                 dictionary.add(word);
             }
+            scanner.close();
         } catch (Exception e) {
             Log.e(TAG, "Could not load dictionary", e);
         }
@@ -239,18 +240,22 @@ public class WordArenaActivity extends AppCompatActivity implements Connectivity
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 String key = dataSnapshot.getKey();
                 int i=key.charAt(0)-'A';
-                letterCounts[i] = dataSnapshot.getValue(Integer.class);
-                temporaryCount[i] = letterCounts[i];
-                ltrAdapt.updateCount(i, letterCounts[i]);
+                if(i>=0&&i<26) {
+                    letterCounts[i] = dataSnapshot.getValue(Integer.class);
+                    temporaryCount[i] = letterCounts[i];
+                    ltrAdapt.updateCount(i, letterCounts[i]);
+                }
             }
 
             @Override
             public void onChildChanged(DataSnapshot dataSnapshot, String s) {
                 String key = dataSnapshot.getKey();
                 int i=key.charAt(0)-'A';
-                letterCounts[i] = dataSnapshot.getValue(Integer.class);
-                temporaryCount[i] = letterCounts[i];
-                ltrAdapt.updateCount(i, letterCounts[i]);
+                if(i>=0&&i<26) {
+                    letterCounts[i] = dataSnapshot.getValue(Integer.class);
+                    temporaryCount[i] = letterCounts[i];
+                    ltrAdapt.updateCount(i, letterCounts[i]);
+                }
             }
 
             @Override

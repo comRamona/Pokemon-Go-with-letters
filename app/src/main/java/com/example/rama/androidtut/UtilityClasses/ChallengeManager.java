@@ -1,12 +1,15 @@
 package com.example.rama.androidtut.UtilityClasses;
 
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.util.Log;
 
 
+import com.example.rama.androidtut.BaseActivity;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -19,82 +22,62 @@ import java.util.HashMap;
 /**
  * ChallengeManager gets alerted each time a new word is created or a new letter is collected,
  * checking and updating the challenge database and awarding bonus hints.
- * It is a singleton object, shared by all the activities in the game.
+ * It is a singleton class, shared by all the activities in the game that need to trigger challenge
+ * events.
  */
 
 public class ChallengeManager {
+    private String TAG="ChallengeManager";
     private static ChallengeManager challengeManager=new ChallengeManager();
+    private FirebaseAuth firebaseAuth;
+    /*
+    Database references
+     */
     private DatabaseReference challengeDb;
     private DatabaseReference statisticsDb;
     private DatabaseReference allWords;
-    private int numberOfWords;
-    private int numberOfHints;
-    private int numberOfLetters;
-    private ValueEventListener numberOfWordsListener;
-    private ValueEventListener numberOfHintsListener;
-    private ValueEventListener numberOfLettersListener;
     private DatabaseReference noWordsRef;
     private DatabaseReference noHintsRef;
     private DatabaseReference noLettersRef;
-    private DatabaseReference[] startRefs;
+    private DatabaseReference startRefs;
+    /**
+     * Event listeners
+     */
+    private ValueEventListener numberOfWordsListener;
+    private ValueEventListener numberOfHintsListener;
+    private ValueEventListener numberOfLettersListener;
+    private ValueEventListener challengesListener;
+    private ChildEventListener startLettersValueEventListener;
+    /**
+     * Store statistics(number of words, hints, letters and challenges)
+     */
+    private int numberOfWords;
+    private int numberOfHints;
+    private int numberOfLetters;
     private boolean[] startLetters;
     private HashMap<String,Challenge> allChallenges=new HashMap<>();
-    private String TAG="ChallengeManager";
-    private FirebaseAuth firebaseAuth;
 
     private ChallengeManager(){
         DatabaseReference database = FirebaseDatabase.getInstance().getReference();
-         firebaseAuth = FirebaseAuth.getInstance();
+        firebaseAuth = FirebaseAuth.getInstance();
 
+        //initialize database references
         challengeDb= database.child("Challenges").child(getUid()).getRef();
         statisticsDb= database.child("Statistics").child(getUid()).getRef();
         allWords=statisticsDb.child("AllWords").getRef();
-
-        startLetters=new boolean[26];
         noWordsRef=statisticsDb.child("NumberOfWords").getRef();
         noHintsRef=statisticsDb.child("NumberOfHints").getRef();
         noLettersRef=statisticsDb.child("NumberOfLetters").getRef();
-        startRefs = new DatabaseReference[26];
-        for(int i=0;i<26;i++) {
-            final int j = i;
-            String letter = (char) (i + 'A') + "";
-            startRefs[i] = statisticsDb.child("StartLetters").child(letter).getRef();
-            startRefs[i].addValueEventListener(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    startLetters[j] = dataSnapshot.getValue(Boolean.class);
-                }
+        startRefs=statisticsDb.child("StartLetters").getRef();
 
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
-                    Log.e(TAG,"Error updating db "+databaseError.getMessage());                }
-            });
-        }
-
-        challengeDb.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                for (DataSnapshot postSnapshot: dataSnapshot.getChildren()) {
-                    Challenge challengeItem=postSnapshot.getValue(Challenge.class);
-                    allChallenges.put(postSnapshot.getKey(),challengeItem);
-
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-               Log.e(TAG,"Error updating db "+databaseError.getMessage());
-
-            }
-        });
-
-
-
-
-
-
+        startLetters=new boolean[26];
     }
 
+    public static ChallengeManager getInstance(){
+        return challengeManager;
+    }
+
+    //get current user uid
     private String getUid(){
          FirebaseUser user = firebaseAuth.getCurrentUser();
         String uid = user.getUid();
@@ -135,20 +118,85 @@ public class ChallengeManager {
                 Log.e(TAG,"Error updating db "+databaseError.getMessage());
             }
         });
+
+        startRefs.addChildEventListener(startLettersValueEventListener=new ChildEventListener() {
+
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                int i=dataSnapshot.getKey().charAt(0)-'A';
+                if(i>=0&&i<26)
+                startLetters[i] = dataSnapshot.getValue(Boolean.class);
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+                int i=dataSnapshot.getKey().charAt(0)-'A';
+                if(i>=0&&i<26)
+                startLetters[i] = dataSnapshot.getValue(Boolean.class);
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.e(TAG,"Error updating db "+databaseError.getMessage());                }
+        });
+
+        challengeDb.addValueEventListener(challengesListener=new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for (DataSnapshot postSnapshot: dataSnapshot.getChildren()) {
+                    Challenge challengeItem=postSnapshot.getValue(Challenge.class);
+                    allChallenges.put(postSnapshot.getKey(),challengeItem);
+
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.e(TAG,"Error updating db "+databaseError.getMessage());
+
+            }
+        });
     }
+
+    /**
+     * Remove all database listeners
+     */
     public void removeListeners(){
         noWordsRef.removeEventListener(numberOfWordsListener);
         noHintsRef.removeEventListener(numberOfHintsListener);
         noLettersRef.removeEventListener(numberOfLettersListener);
+        startRefs.removeEventListener(startLettersValueEventListener);
+        challengeDb.removeEventListener(challengesListener);
     }
-  
+
+    /**
+     * Increase or decrease the number of hints
+     * @param i number of hints to add or substract
+     */
     private void changeNumberOfHints(int i){
         statisticsDb.child("NumberOfHints").getRef().setValue(numberOfHints+i);
     }
+
+    /**
+     * Check wether newly created word completes any challenges
+     * @param word
+     * @param context
+     * @param scoreToAdd
+     */
     public void checkWord(String word, Context context, int scoreToAdd){
         int newTotal=numberOfWords+1;
         BonusHint returnHint=new BonusHint("default",0);
-        android.support.v7.app.AlertDialog alertDialog=getAlertDialog(context);
+        AlertDialog alertDialog=BaseActivity.getAlertDialog(context);
 
 
         if(newTotal==1) {
@@ -182,23 +230,26 @@ public class ChallengeManager {
             if(allLetters){
                 challengeDb.child("eachletterword").child("completed").setValue(true);
                 changeNumberOfHints(2);
-                android.support.v7.app.AlertDialog alertDialog2 = getAlertDialog(context);
+                AlertDialog alertDialog2 = BaseActivity.getAlertDialog(context);
                 alertDialog2.setMessage("You have created a word starting with each letter of the" +
                         " alphabet! That's impressive! Here are 2 bonus hints!");
                 alertDialog2.show();
             }
-            int i=word.charAt(0)-'A';
-            startRefs[i].setValue(true);
+            startRefs.child(word.charAt(0)+"").setValue(true);
 
         }
 
     }
 
+    /**
+     * Check whether consecdays challenge is complete
+     * @param context
+     */
     public void consecdays(Context context){
         Log.i(TAG,Boolean.toString(allChallenges.get("consecdays").isCompleted()));
         if(!allChallenges.get("consecdays").isCompleted()){
             challengeDb.child("consecdays").child("completed").getRef().setValue(true);
-            android.support.v7.app.AlertDialog alertDialog = getAlertDialog(context);
+            AlertDialog alertDialog = BaseActivity.getAlertDialog(context);
             alertDialog.setMessage("You have played the game on consecutive days! \n" +
                     "Here are 2 bonus hints for you!");
             alertDialog.show();
@@ -206,6 +257,11 @@ public class ChallengeManager {
         }
     }
 
+    /**
+     * Check whether there are one of each letter or 5 of each
+     * @param counts
+     * @param context
+     */
     public void checkCounts(int[] counts,Context context){
         boolean oneEach=true;
         boolean fiveEach=true;
@@ -218,7 +274,7 @@ public class ChallengeManager {
         if(oneEach){
             if(!allChallenges.get("1eachletter").isCompleted()) {
                 challengeDb.child("1eachletter").child("completed").getRef().setValue(true);
-                android.support.v7.app.AlertDialog alertDialog = getAlertDialog(context);
+                AlertDialog alertDialog = BaseActivity.getAlertDialog(context);
                 alertDialog.setMessage("You have collected 1 of each letter! \n" +
                         "Here are 3 bonus hints for you!");
                 alertDialog.show();
@@ -228,7 +284,7 @@ public class ChallengeManager {
         if(fiveEach){
             if(!allChallenges.get("5eachletter").isCompleted()) {
                 challengeDb.child("5eachletter").child("completed").getRef().setValue(true);
-                android.support.v7.app.AlertDialog alertDialog = getAlertDialog(context);
+                AlertDialog alertDialog = BaseActivity.getAlertDialog(context);
                 alertDialog.setMessage("You have collected 5 of each letter! \n" +
                         "Here are 3 bonus hints for you!");
                 alertDialog.show();
@@ -237,10 +293,15 @@ public class ChallengeManager {
         }
     }
 
+    /**
+     * Check whether there are any challenges completed with the addition with the latest collected
+     * letter
+     * @param context
+     */
     public void checkLetter(Context context){
         Log.i(TAG,numberOfLetters+1+" letters collected so far");
         if(numberOfLetters+1==1){
-            android.support.v7.app.AlertDialog alertDialog = getAlertDialog(context);
+            AlertDialog alertDialog = BaseActivity.getAlertDialog(context);
             alertDialog.setMessage("You have collected your first letter! \n" +
                     "Here is a bonus hint for you!");
             alertDialog.show();
@@ -248,7 +309,7 @@ public class ChallengeManager {
             challengeDb.child("100letters").child("completed").getRef().setValue(true);
         }
       if(numberOfLetters+1==100){
-          android.support.v7.app.AlertDialog alertDialog = getAlertDialog(context);
+          AlertDialog alertDialog = BaseActivity.getAlertDialog(context);
           alertDialog.setMessage("You have collected 100 letters! \n" +
                   "Here is a bonus hint for you!");
           alertDialog.show();
@@ -262,31 +323,22 @@ public class ChallengeManager {
 
     }
 
+    /**
+     * Check whether score of 2000 challenge has been achieved
+     * @param score
+     * @param context
+     */
     public void checkScore(int score, Context context){
         if(!allChallenges.get("score2000").isCompleted()&&score>=2000){
             challengeDb.child("score2000").child("completed").getRef().setValue(true);
-            android.support.v7.app.AlertDialog alertDialog = getAlertDialog(context);
+            AlertDialog alertDialog = BaseActivity.getAlertDialog(context);
             alertDialog.setMessage("You have achieved a score of 2000! Here are 5 bonus hints " +
                     "for you");
             alertDialog.show();
             changeNumberOfHints(5);
         }
     }
-    public static ChallengeManager getInstance(){
-        return challengeManager;
-    }
 
 
-private android.support.v7.app.AlertDialog getAlertDialog(Context context) {
-    android.support.v7.app.AlertDialog alertDialog = new android.support.v7.app.AlertDialog.Builder(context).create();
 
-    alertDialog.setButton(android.support.v7.app.AlertDialog.BUTTON_NEUTRAL, "OK",
-            new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int which) {
-                    dialog.dismiss();
-                }
-            });
-    alertDialog.setTitle(("Congrats!"));
-    return alertDialog;
-}
 }

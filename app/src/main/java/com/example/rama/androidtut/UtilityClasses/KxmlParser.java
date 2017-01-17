@@ -11,7 +11,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by rama on 13/10/16.
+ * Parser for kxml files, based on:
+ * https://developer.android.com/training/basics/network-ops/xml.html
  */
 
 public class KxmlParser {
@@ -67,7 +68,7 @@ public class KxmlParser {
     }
 
     // Parses the contents of an entry. If it encounters a fieldOne, summary, or description tag, hands them off
-// to their respective "read" methods for processing. Otherwise, skips the tag.
+    // to their respective "read" methods for processing. Otherwise, skips the tag.
     private Placemark readEntry(XmlPullParser parser) throws XmlPullParserException, IOException {
         parser.require(XmlPullParser.START_TAG, ns, "Placemark");
         String title = null;
@@ -155,6 +156,9 @@ public class KxmlParser {
         return result;
     }
 
+    /**
+     * Placemark object
+     */
     public static class Placemark {
         private final String name;
         private final String description;
@@ -184,6 +188,10 @@ public class KxmlParser {
             return lng;
         }
 
+        /**
+         * String representation, replacing special characters so it cna be stored in database
+         * @return
+         */
         public String getAsKey() {
             return (lat + "!" + lng).replaceAll("\\.",",");
         }

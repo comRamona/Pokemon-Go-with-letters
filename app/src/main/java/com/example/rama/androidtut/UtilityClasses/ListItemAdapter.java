@@ -11,13 +11,14 @@ import com.example.rama.androidtut.R;
 
 import java.util.List;
 
+/**
+ * Adapter for displaying a list of ListItems
+ */
 public class ListItemAdapter extends BaseAdapter {
 
     private  Context mContext;
     private LayoutInflater inflater;
     private List<ListItem> itemsItems;
-
-
 
     public ListItemAdapter(Context context, List<ListItem> itemsItems) {
         this.mContext = context;

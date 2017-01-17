@@ -16,7 +16,6 @@ import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.action.ViewActions.click;
 import static android.support.test.espresso.assertion.ViewAssertions.matches;
 import static android.support.test.espresso.matcher.ViewMatchers.isClickable;
-import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static android.support.test.espresso.matcher.ViewMatchers.isEnabled;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
 import static org.hamcrest.Matchers.allOf;
@@ -25,30 +24,15 @@ import static org.hamcrest.Matchers.allOf;
 @LargeTest
 public class MainActivityButtonsInstrumentedTest {
     @Rule
-    public ActivityTestRule mActivityTestRule=new ActivityTestRule<>(MainActivity.class);
+    public ActivityTestRule mActivityTestRule = new ActivityTestRule<>(MainActivity.class);
+
 
     /**
-     * Test pressing help button, which displays instructions
+     * Test starting game, signing out first if needed
      */
     @Test
-    public void showInstructions(){
-        onView(withId(R.id.help)).perform(click());
-    }
-
-    /**
-     * Test starting game
-     */
-    @Test
-    public void startGame(){
-        onView(withId(R.id.start_game_button)).perform(click());
-    }
-
-    /**
-     * Test sign it button
-     */
-    @Test
-    public void signOut(){
-        onView(withId(R.id.email_sign_in_button)).check(matches(allOf( isEnabled(), isClickable()))).perform(
+    public void signIn() {
+        onView(withId(R.id.sign_out_button)).check(matches(allOf(isEnabled(), isClickable()))).perform(
                 new ViewAction() {
                     @Override
                     public Matcher<View> getConstraints() {
@@ -63,9 +47,35 @@ public class MainActivityButtonsInstrumentedTest {
                     @Override
                     public void perform(UiController uiController, View view) {
                         view.performClick();
+
                     }
                 }
         );
+        onView(withId(R.id.email_sign_in_button)).check(matches(allOf(isEnabled(), isClickable()))).perform(
+                new ViewAction() {
+                    @Override
+                    public Matcher<View> getConstraints() {
+                        return isEnabled(); // no constraints, they are checked above
+                    }
+
+                    @Override
+                    public String getDescription() {
+                        return "click plus button";
+                    }
+
+                    @Override
+                    public void perform(UiController uiController, View view) {
+                        view.performClick();
+
+                    }
+                }
+        );
+        try {
+            onView(withId(R.id.start_game_button)).perform(click());
+        } catch (Exception e) {
+
+        }
+
     }
 }
 
